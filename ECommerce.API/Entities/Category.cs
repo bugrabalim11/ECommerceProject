@@ -9,6 +9,6 @@
 
 
         // İlişki (Bire-Çok): Bir kullanıcının birden fazla siparişi olabilir
-        public ICollection<Product> Products { get; set; } = null!;
+        public ICollection<Product>? Products { get; set; } = null!;
     }
 }

@@ -1,6 +1,5 @@
-// Entity Framework ve Context sınıflarımızı kullanabilmek için gerekli kütüphaneler
 using Microsoft.EntityFrameworkCore;
-using ECommerce.API.Context; // Context klasörünün yolunu kendi projene göre ayarla
+using ECommerce.API.Context;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,21 +8,22 @@ builder.Services.AddDbContext<ECommerceContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+
+// 1. OpenApi yerine Swagger servislerini projeye ekliyoruz
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    // 2. MapOpenApi yerine Swagger arayüzünü kullanıma açıyoruz
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
