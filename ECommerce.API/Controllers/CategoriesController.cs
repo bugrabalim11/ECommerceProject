@@ -48,7 +48,7 @@ namespace ECommerce.API.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteCategory(int id)
         {
-            var values= _context.Categories.Find(id);
+            var values = _context.Categories.Find(id);
             if (values == null)
             {
                 return NotFound("Kategori bulunamadı!");
@@ -60,10 +60,9 @@ namespace ECommerce.API.Controllers
 
 
         [HttpPut]
-        public IActionResult UpdateCategory(Category category)
+        public IActionResult UpdateCategoryDto(UpdateCategoryDto dto)
         {
-            // 1. Güncellenmek istenen kategori gerçekten veritabanında var mı?
-            var values = _context.Categories.Find(category.CategoryId);
+            var values = _context.Categories.Find(dto.CategoryId);  // Artık Entity değil, DTO alıyoruz!
 
             if (values == null)
             {
@@ -71,9 +70,10 @@ namespace ECommerce.API.Controllers
             }
 
 
-            // 2. Mevcut kaydın bilgilerini dışarıdan gelen bilgilerle güncelliyoruz
-            values.CategoryName = category.CategoryName;
-            values.CategoryDescription = category.CategoryDescription;
+            // 2. DTO'dan gelen yeni değerleri, veritabanındaki eski değerlerin üzerine yazıyoruz
+            values.CategoryName = dto.CategoryName;
+            values.CategoryDescription = dto.CategoryDescription;
+
             _context.SaveChanges();
 
             return Ok("Kategori Başarıyla Güncellendi!");
