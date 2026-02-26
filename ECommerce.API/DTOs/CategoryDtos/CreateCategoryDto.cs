@@ -1,4 +1,4 @@
-﻿namespace ECommerce.API.DTOs
+﻿namespace ECommerce.API.DTOs.CategoryDtos
 {
     public class CreateCategoryDto
     {

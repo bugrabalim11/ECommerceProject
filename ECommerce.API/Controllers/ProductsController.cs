@@ -1,6 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;   // ToList() metodu için gerekli
 using ECommerce.API.Context;
 using ECommerce.API.Entities;
 using ECommerce.API.DTOs.ProductDtos;
