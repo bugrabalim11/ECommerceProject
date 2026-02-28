@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using ECommerce.API.Context;
 using ECommerce.API.Entities;
 using ECommerce.API.DTOs.ProductDtos;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace ECommerce.API.Controllers
@@ -21,7 +22,17 @@ namespace ECommerce.API.Controllers
         [HttpGet]   // Ürünleri listeleme
         public IActionResult GetProductList()
         {
-            var values = _context.Products.ToList();
+            var values =_context.Products
+                .Include(x=>x.Category)  // Kategoriyi dahil et
+                .Select(y=> new ResultProductDto   // Kategoriyi dahil et
+                {
+                    ProductId = y.ProductId,
+                    ProductName = y.ProductName,
+                    ProductPrice = y.ProductPrice,
+                    CategoryName = y.Category.CategoryName   // İşte sihir burada! Kategori nesnesinin içinden sadece adını cımbızladık.
+                })
+                .ToList();
+
             return Ok(values);
         }
 

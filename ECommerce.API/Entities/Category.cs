@@ -8,7 +8,7 @@
 
 
 
-        // İlişki (Bire-Çok): Bir kullanıcının birden fazla siparişi olabilir
+        // Bir kategorinin birden fazla ürünü olabilir
         public ICollection<Product>? Products { get; set; } = null!;
     }
 }
