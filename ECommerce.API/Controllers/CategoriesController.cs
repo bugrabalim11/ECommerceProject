@@ -2,6 +2,7 @@
 using ECommerce.API.Context;
 using ECommerce.API.Entities;
 using ECommerce.API.DTOs.CategoryDtos;
+using FluentValidation;
 
 namespace ECommerce.API.Controllers
 {
@@ -28,8 +29,16 @@ namespace ECommerce.API.Controllers
 
 
         [HttpPost]   // Veri ekleme işlemleri için her zaman HttpPost kullanırız
-        public IActionResult CreateCategory(CreateCategoryDto dto) // Burayı 'dto' yaptık
+        public IActionResult CreateCategory(CreateCategoryDto dto , [FromServices] IValidator<CreateCategoryDto> validator) 
         {
+            var validationResult = validator.Validate(dto);
+
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
+
+
             Category newCategory = new Category
             {
                 CategoryName = dto.CategoryName,

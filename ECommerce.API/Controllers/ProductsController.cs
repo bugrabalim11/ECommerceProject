@@ -4,6 +4,7 @@ using ECommerce.API.Context;
 using ECommerce.API.Entities;
 using ECommerce.API.DTOs.ProductDtos;
 using Microsoft.EntityFrameworkCore;
+using FluentValidation;
 
 
 namespace ECommerce.API.Controllers
@@ -37,8 +38,19 @@ namespace ECommerce.API.Controllers
         }
 
         [HttpPost]   // Ürün ekleme  
-        public IActionResult CreateProduct(CreateProductDto dto)
+        public IActionResult CreateProduct(CreateProductDto dto, [FromServices] IValidator<CreateProductDto> validator)
         {
+            // 1. KAPI KONTROLÜ: Gelen veriyi (dto) güvenlik görevlisine ver, kurallara uyuyor mu baksın.
+            var validationResult = validator.Validate(dto);
+
+            // 2. EĞER KURALLARA UYMUYORSA: (Örn: Fiyat eksi ise veya isim boşsa)
+            if (!validationResult.IsValid)
+            {
+                // İçeri girmesine izin verme! Hata mesajlarını (400 Bad Request) kullanıcının yüzüne çarp.
+                return BadRequest(validationResult.Errors);
+            }
+
+
             // Dışarıdan gelen DTO'yu, veritabanına kaydedilecek Entity'ye çeviriyoruz
             Product product =new Product
             {

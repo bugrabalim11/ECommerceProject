@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ECommerce.API.Context;
+using FluentValidation;
+using ECommerce.API.ValidationRules;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,10 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
 });
+
+// Sisteme "CreateProductValidator'ın bulunduğu klasördeki TÜM güvenlik görevlilerini işe al" diyoruz.
+builder.Services.AddValidatorsFromAssemblyContaining<CreateProductValidator>();
+// !!!!! Kodu, projeyi tarayıp o klasördeki bütün güvenlik görevlilerini otomatik olarak işe aldı !!!!!
 
 // 1. OpenApi yerine Swagger servislerini projeye ekliyoruz
 builder.Services.AddEndpointsApiExplorer();
