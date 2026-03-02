@@ -2,11 +2,13 @@
 using ECommerce.API.Context;
 using ECommerce.API.Entities;
 using ECommerce.API.DTOs.UserDtos;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ECommerce.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly ECommerceContext _context;

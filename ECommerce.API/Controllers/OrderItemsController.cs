@@ -2,11 +2,14 @@
 using ECommerce.API.Context;
 using ECommerce.API.Entities;
 using ECommerce.API.DTOs.OrderItemDtos;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace ECommerce.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class OrderItemsController : ControllerBase
     {
         private readonly ECommerceContext _context;

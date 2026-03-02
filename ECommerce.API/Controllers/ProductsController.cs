@@ -5,12 +5,14 @@ using ECommerce.API.Entities;
 using ECommerce.API.DTOs.ProductDtos;
 using Microsoft.EntityFrameworkCore;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace ECommerce.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ProductsController : ControllerBase
     {
       private readonly ECommerceContext _context;
@@ -20,6 +22,7 @@ namespace ECommerce.API.Controllers
         }
 
 
+        [AllowAnonymous]
         [HttpGet]   // Ürünleri listeleme
         public IActionResult GetProductList()
         {

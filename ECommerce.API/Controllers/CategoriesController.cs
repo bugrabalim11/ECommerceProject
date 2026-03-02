@@ -3,11 +3,13 @@ using ECommerce.API.Context;
 using ECommerce.API.Entities;
 using ECommerce.API.DTOs.CategoryDtos;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ECommerce.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize] // 1. BÜTÜN CONTROLLER KİLİTLENDİ! (Kimliksiz kimse giremez)
     public class CategoriesController : ControllerBase
     {
         // 1. Senin oluşturduğun veritabanı sınıfını tanımlıyoruz
@@ -20,6 +22,7 @@ namespace ECommerce.API.Controllers
         }
 
 
+        [AllowAnonymous]  // Tekil getirme de vitrindir, o da açık kalsın
         [HttpGet]
         public IActionResult GetCategoryList()
         {
