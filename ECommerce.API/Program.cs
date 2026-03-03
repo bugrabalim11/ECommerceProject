@@ -1,4 +1,7 @@
 using ECommerce.API.Context;
+using ECommerce.API.Interfaces;
+using ECommerce.API.Repositories;
+using ECommerce.API.Services;
 using ECommerce.API.ValidationRules;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -24,6 +27,31 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProductValidator>();
 
 builder.Services.AddEndpointsApiExplorer();
+
+// --- ŞİRKETİMİZİN YENİ ÇALIŞANLARI (DEPENDENCY INJECTION) ---
+
+// 1. Genel Depocuyu işe alıyoruz (Joker tip <> olduğu için typeof kullanıyoruz)
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+// 2. Kategori Depocusunu işe alıyoruz
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+
+// 3. Kategori Aşçısını (Service) işe alıyoruz
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+
+// 4. Ürün Depocusunu işe alıyoruz
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
+// 5. Ürün Aşçısını (Service) işe alıyoruz
+builder.Services.AddScoped<IProductService, ProductService>();
+
+//6. Sipariş Depocusunu işe alıyoruz
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+
+//7. Sipariş Aşçısını (Service) işe alıyoruz
+builder.Services.AddScoped<IOrderService, OrderService>();
+
+// -------------------------------------------------------------
 
 // --- SWAGGER VİTRİN VE KART OKUYUCU AYARLARI ---
 builder.Services.AddSwaggerGen(x =>

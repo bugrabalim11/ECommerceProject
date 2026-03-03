@@ -1,4 +1,4 @@
-﻿namespace ECommerce.API.DTOs.OrderDtos
+﻿namespace ECommerce.API.DTOs.OrderItemDtos
 {
     public class ResultOrderItemDto
     {

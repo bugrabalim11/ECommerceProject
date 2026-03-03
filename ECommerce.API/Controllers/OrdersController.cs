@@ -1,94 +1,64 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using ECommerce.API.Context;
+﻿using ECommerce.API.Interfaces;
 using ECommerce.API.Entities;
 using ECommerce.API.DTOs.OrderDtos;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-
 
 namespace ECommerce.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]  
+    [Authorize]
     public class OrdersController : ControllerBase
     {
-        private readonly ECommerceContext _context;
-        public OrdersController(ECommerceContext context)
+        private readonly IOrderService _orderService;
+
+        public OrdersController(IOrderService orderService)
         {
-            _context = context;
+            _orderService = orderService;
         }
 
-        [HttpGet] 
-        public IActionResult GetOrderList()
+        [HttpGet]
+        public async Task<IActionResult> GetOrderList()
         {
-           var values = _context.Orders
-                .Include(x => x.User)  // 1. Siparişi veren Müşteriyi (User) dahil et
-                .Include(x=> x.OrderItems)  // 2. Siparişin içindeki sepet detaylarını (OrderItems) dahil et
-                .ThenInclude(y=> y.Product)  // 3. O detayların İÇİNE GİR ve asıl Ürünü (Product) dahil et!
-                .Select(z=> new ResultOrderDto  // İŞTE SİHİR BURADA BAŞLIYOR!
-                {
-                    OrderId = z.OrderId,
-                    CustomerFullName = z.User.UserName + " " + z.User.UserSurname,  // Ad ve Soyadı birleştirdik
-                    OrderDate = z.OrderDate,
-                    OrderTotalAmount = z.OrderTotalAmount,
-                    OrderStatus = z.OrderStatus,
-
-
-                    // Siparişin içindeki kalemleri de kendi DTO'suna çeviriyoruz:
-                    Items = z.OrderItems.Select(w=>new ResultOrderItemDto
-                    {
-                        ProductName = w.Product.ProductName,  
-                        Quantity = w.Quantity,
-                        UnitPrice = w.UnitPrice
-                    }).ToList()  
-                }).ToList();
+            // Tüm o Include'lar, Select'ler artık Service'in içinde gizli. 
+            // Controller artık çok ferah!
+            var values = await _orderService.GetOrdersWithDetailsAsync();
             return Ok(values);
         }
 
         [HttpPost]
-        public IActionResult CreateOrder(CreateOrderDto dto)
+        public async Task<IActionResult> CreateOrder(CreateOrderDto dto)
         {
-            Order order = new Order
+            var order = new Order
             {
                 UserId = dto.UserId,
                 OrderTotalAmount = dto.OrderTotalAmount,
-                OrderDate = DateTime.Now,   // Tarihi otomatik verdik!
-                OrderStatus = "Sipariş Alındı!"   // İlk sipariş durumunu otomatik atadık!
+                OrderDate = DateTime.Now,
+                OrderStatus = "Sipariş Alındı!"
             };
-            _context.Orders.Add(order);
-            _context.SaveChanges();
+            await _orderService.AddOrderAsync(order);
             return Ok("Sipariş Başarıyla Oluşturuldu!");
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteOrder(int id)
+        public async Task<IActionResult> DeleteOrder(int id)
         {
-            var value = _context.Orders.Find(id);
-            if (value == null)
-            {
-                return NotFound("Silincek Sipariş bulunamadı!");
-            }
-            _context.Orders.Remove(value);
-            _context.SaveChanges();
+            await _orderService.DeleteOrderAsync(id);
             return Ok("Sipariş Başarıyla Silindi!");
         }
 
         [HttpPut]
-        public IActionResult UpdateOrder(UpdateOrderDto dto)
+        public async Task<IActionResult> UpdateOrder(UpdateOrderDto dto)
         {
-            var value = _context.Orders.Find(dto.OrderId);
-            if (value == null)
-            {
-                return NotFound("Güncellenecek Sipariş bulunamadı!");
-            }
+            var value = await _orderService.GetOrderByIdAsync(dto.OrderId);
+            if (value == null) return NotFound("Güncellenecek Sipariş bulunamadı!");
+
             value.UserId = dto.UserId;
             value.OrderTotalAmount = dto.OrderTotalAmount;
-            value.OrderStatus = dto.OrderStatus;  // Durumu güncelledik (örn: "Kargoya Verildi")
-            // OrderDate'i güncellemiyoruz, sabit kalıyor.
+            value.OrderStatus = dto.OrderStatus;
 
-            _context.Orders.Update(value);
-            _context.SaveChanges();
+            await _orderService.UpdateOrderAsync(value);
             return Ok("Sipariş Başarıyla Güncellendi!");
         }
     }

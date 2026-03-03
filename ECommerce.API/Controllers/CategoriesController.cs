@@ -1,93 +1,61 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using ECommerce.API.Context;
-using ECommerce.API.Entities;
-using ECommerce.API.DTOs.CategoryDtos;
-using FluentValidation;
+﻿using ECommerce.API.Entities;
+using ECommerce.API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerce.API.Controllers
 {
+    [Authorize] // Dün astığımız kapı kilidimiz :)
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // 1. BÜTÜN CONTROLLER KİLİTLENDİ! (Kimliksiz kimse giremez)
     public class CategoriesController : ControllerBase
     {
-        // 1. Senin oluşturduğun veritabanı sınıfını tanımlıyoruz
-        private readonly ECommerceContext _context;
-        
-        // 2. Garsona senin mutfağının (ECommerceContext) anahtarını veriyoruz
-        public CategoriesController(ECommerceContext context)
+        // Artık veritabanını (Context) DEĞİL, Aşçımızı (Service) çağırıyoruz!
+        private readonly ICategoryService _categoryService;
+
+        public CategoriesController(ICategoryService categoryService)
         {
-            _context = context;
+            _categoryService = categoryService;
         }
 
-
-        [AllowAnonymous]  // Tekil getirme de vitrindir, o da açık kalsın
+        [AllowAnonymous] // Vitrinimiz herkese açık
         [HttpGet]
-        public IActionResult GetCategoryList()
+        public async Task<IActionResult> GetAllCategories()
         {
-            var values = _context.Categories.ToList();
-            return Ok(values);
+            // Controller'ın içi ne kadar temizleşti bak: "Aşçı bana tüm kategorileri ver!"
+            var categories = await _categoryService.GetAllCategoriesAsync();
+            return Ok(categories);
         }
 
-
-        [HttpPost]   // Veri ekleme işlemleri için her zaman HttpPost kullanırız
-        public IActionResult CreateCategory(CreateCategoryDto dto , [FromServices] IValidator<CreateCategoryDto> validator) 
+        [AllowAnonymous]
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetCategoryById(int id)
         {
-            var validationResult = validator.Validate(dto);
+            var category = await _categoryService.GetCategoryByIdAsync(id);
+            if (category == null) return NotFound("Bu ID'ye ait kategori bulunamadı.");
 
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(validationResult.Errors);
-            }
-
-
-            Category newCategory = new Category
-            {
-                CategoryName = dto.CategoryName,
-                CategoryDescription = dto.CategoryDescription
-            };
-
-            _context.Categories.Add(newCategory);
-            _context.SaveChanges();
-
-            return Ok("Kategori Başarıyla Eklendi!");
+            return Ok(category);
         }
 
-
-        [HttpDelete("{id}")]
-        public IActionResult DeleteCategory(int id)
+        [HttpPost]
+        public async Task<IActionResult> CreateCategory([FromBody] Category category)
         {
-            var values = _context.Categories.Find(id);
-            if (values == null)
-            {
-                return NotFound("Kategori bulunamadı!");
-            }
-            _context.Categories.Remove(values);
-            _context.SaveChanges();
-            return Ok("Kategori başarıyla silindi!");
+            await _categoryService.AddCategoryAsync(category);
+            return Ok("Kategori başarıyla eklendi.");
         }
-
 
         [HttpPut]
-        public IActionResult UpdateCategoryDto(UpdateCategoryDto dto)
+        public async Task<IActionResult> UpdateCategory([FromBody] Category category)
         {
-            var values = _context.Categories.Find(dto.CategoryId);  // Artık Entity değil, DTO alıyoruz!
-
-            if (values == null)
-            {
-                return NotFound("Kategori bulunamadı!");
-            }
-
-
-            // 2. DTO'dan gelen yeni değerleri, veritabanındaki eski değerlerin üzerine yazıyoruz
-            values.CategoryName = dto.CategoryName;
-            values.CategoryDescription = dto.CategoryDescription;
-
-            _context.SaveChanges();
-
-            return Ok("Kategori Başarıyla Güncellendi!");
+            await _categoryService.UpdateCategoryAsync(category);
+            return Ok("Kategori başarıyla güncellendi.");
         }
 
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCategory(int id)
+        {
+            await _categoryService.DeleteCategoryAsync(id);
+            return Ok("Kategori başarıyla silindi.");
+        }
     }
 }

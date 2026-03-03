@@ -1,106 +1,60 @@
-﻿
-using Microsoft.AspNetCore.Mvc;
-using ECommerce.API.Context;
-using ECommerce.API.Entities;
-using ECommerce.API.DTOs.ProductDtos;
-using Microsoft.EntityFrameworkCore;
-using FluentValidation;
+﻿using ECommerce.API.Entities;
+using ECommerce.API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-
+using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerce.API.Controllers
 {
+    [Authorize] // Güvenlik kapımız kapalı!
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class ProductsController : ControllerBase
     {
-      private readonly ECommerceContext _context;
-        public ProductsController(ECommerceContext context)
+        // Artık sadece Aşçımızı (Service) çağırıyoruz!
+        private readonly IProductService _productService;
+
+        public ProductsController(IProductService productService)
         {
-            _context = context;
+            _productService = productService;
         }
 
+        [AllowAnonymous] // Ürünleri listelemek (vitrine bakmak) herkese serbest
+        [HttpGet]
+        public async Task<IActionResult> GetAllProducts()
+        {
+            var products = await _productService.GetAllProductsAsync();
+            return Ok(products);
+        }
 
         [AllowAnonymous]
-        [HttpGet]   // Ürünleri listeleme
-        public IActionResult GetProductList()
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetProductById(int id)
         {
-            var values =_context.Products
-                .Include(x=>x.Category)  // Kategoriyi dahil et
-                .Select(y=> new ResultProductDto   // Kategoriyi dahil et
-                {
-                    ProductId = y.ProductId,
-                    ProductName = y.ProductName,
-                    ProductPrice = y.ProductPrice,
-                    CategoryName = y.Category.CategoryName   // İşte sihir burada! Kategori nesnesinin içinden sadece adını cımbızladık.
-                })
-                .ToList();
+            var product = await _productService.GetProductByIdAsync(id);
+            if (product == null) return NotFound("Bu ID'ye ait ürün bulunamadı.");
 
-            return Ok(values);
+            return Ok(product);
         }
 
-        [HttpPost]   // Ürün ekleme  
-        public IActionResult CreateProduct(CreateProductDto dto, [FromServices] IValidator<CreateProductDto> validator)
+        [HttpPost]
+        public async Task<IActionResult> CreateProduct([FromBody] Product product)
         {
-            // 1. KAPI KONTROLÜ: Gelen veriyi (dto) güvenlik görevlisine ver, kurallara uyuyor mu baksın.
-            var validationResult = validator.Validate(dto);
-
-            // 2. EĞER KURALLARA UYMUYORSA: (Örn: Fiyat eksi ise veya isim boşsa)
-            if (!validationResult.IsValid)
-            {
-                // İçeri girmesine izin verme! Hata mesajlarını (400 Bad Request) kullanıcının yüzüne çarp.
-                return BadRequest(validationResult.Errors);
-            }
-
-
-            // Dışarıdan gelen DTO'yu, veritabanına kaydedilecek Entity'ye çeviriyoruz
-            Product product =new Product
-            {
-                CategoryId = dto.CategoryId,
-                ProductName = dto.ProductName,
-                ProductDescription = dto.ProductDescription,
-                ProductPrice = dto.ProductPrice,
-                StockQuantity = dto.StockQuantity
-            };
-            _context.Products.Add(product);
-            _context.SaveChanges();
-            return Ok("Ürün Başarıyla Eklendi!");
+            await _productService.AddProductAsync(product);
+            return Ok("Ürün başarıyla eklendi.");
         }
 
-        [HttpDelete("{id}")]   // Ürün silme
-        public IActionResult DeleteProduct(int id)
+        [HttpPut]
+        public async Task<IActionResult> UpdateProduct([FromBody] Product product)
         {
-            var value = _context.Products.Find(id);
-            if ( value== null)
-            {
-                return NotFound("Silinnecek Ürün bulunamadı!");
-            }
-
-            _context.Products.Remove(value);
-            _context.SaveChanges();
-            return Ok("Ürün Başarıyla Silindi!");
+            await _productService.UpdateProductAsync(product);
+            return Ok("Ürün başarıyla güncellendi.");
         }
 
-
-        [HttpPut]  //Üürn Güncelleme
-        public IActionResult UpdateProduct(UpdateProductDto dto)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProduct(int id)
         {
-            // 1. DTO'dan gelen ProductId ile veritabanında o ürünü bul
-            var value = _context.Products.Find(dto.ProductId);
-            if (value== null)
-            {
-                return NotFound("Güncellenecek Ürün bulunamadı!");
-            }
-
-            value.CategoryId = dto.CategoryId;
-            value.ProductName = dto.ProductName;
-            value.ProductDescription = dto.ProductDescription;
-            value.ProductPrice = dto.ProductPrice;
-            value.StockQuantity = dto.StockQuantity;
-
-            _context.SaveChanges();
-            return Ok("Ürün Başarıyla Güncellendi!");
+            await _productService.DeleteProductAsync(id);
+            return Ok("Ürün başarıyla silindi.");
         }
     }
 }
