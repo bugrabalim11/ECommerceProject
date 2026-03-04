@@ -7,58 +7,62 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Veritabanı köprümüzü (DbContext) ve SQL Server adresimizi sisteme tanıtıyoruz
+// --- 1. TEMEL AYARLAR ---
 builder.Services.AddDbContext<ECommerceContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 2. JSON oluştururken sonsuz bir döngü (Cycle) fark edersen onu görmezden gel (IgnoreCycles).
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
 });
 
-// 3. Sisteme "CreateProductValidator'ın bulunduğu klasördeki TÜM güvenlik görevlilerini işe al" diyoruz.
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProductValidator>();
-
 builder.Services.AddEndpointsApiExplorer();
 
-// --- ŞİRKETİMİZİN YENİ ÇALIŞANLARI (DEPENDENCY INJECTION) ---
+// --- 2. GÜVENLİK VE KİMLİK (JWT) AYARLARI ---
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var secretKey = jwtSettings["SecretKey"];
 
-// 1. Genel Depocuyu işe alıyoruz (Joker tip <> olduğu için typeof kullanıyoruz)
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidAudience = jwtSettings["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!))
+    };
+});
+
+// --- 3. DEPENDENCY INJECTION (İŞÇİ KAYITLARI) ---
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-
-// 2. Kategori Depocusunu işe alıyoruz
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-
-// 3. Kategori Aşçısını (Service) işe alıyoruz
 builder.Services.AddScoped<ICategoryService, CategoryService>();
-
-// 4. Ürün Depocusunu işe alıyoruz
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
-
-// 5. Ürün Aşçısını (Service) işe alıyoruz
 builder.Services.AddScoped<IProductService, ProductService>();
-
-//6. Sipariş Depocusunu işe alıyoruz
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-
-//7. Sipariş Aşçısını (Service) işe alıyoruz
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IOrderItemRepository, OrderItemRepository>();
+builder.Services.AddScoped<IOrderItemService, OrderItemService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
-// -------------------------------------------------------------
-
-// --- SWAGGER VİTRİN VE KART OKUYUCU AYARLARI ---
+// --- 4. SWAGGER (VİTRİN) AYARLARI ---
 builder.Services.AddSwaggerGen(x =>
 {
     x.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "Yaka kartınızı (Token) buraya yapıştırın. Örnek: Bearer eyJhb...",
+        // İŞTE BURAYI DEĞİŞTİRİYORUZ! Artık kimse "Bearer" yazmayacak.
+        Description = "Lütfen SADECE Token'ı (eyJ...) buraya yapıştırın. Başına 'Bearer' YAZMAYIN, sistem otomatik ekleyecektir.",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.Http,
@@ -79,29 +83,11 @@ builder.Services.AddSwaggerGen(x =>
             new string[]{}
         }
     });
-}); // <-- DİKKAT: Swagger ayarları BURADA bitti!
-
-// --- JWT (DİJİTAL YAKA KARTI) KİMLİK MAKİNESİ AYARLARI ---
-var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var secretKey = jwtSettings["SecretKey"];
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!))
-    };
 });
 
 var app = builder.Build();
 
-// --- HTTP İSTEK BORU HATTI (PIPELINE) ---
+// --- 5. HTTP İSTEK BORU HATTI (PIPELINE) ---
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -110,9 +96,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// GÜVENLİK GÖREVLİLERİ (SIRALAMA ÇOK ÖNEMLİ!)
-app.UseAuthentication(); // 1. ÖNCE KİMLİK KONTROLÜ (Sen kimsin? Kartın var mı?)
-app.UseAuthorization();  // 2. SONRA YETKİ KONTROLÜ (İçeri girmeye yetkin var mı?)
+// GÜVENLİK KORUMALARI (Sıralama kusursuz!)
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 app.Run();

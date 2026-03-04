@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ECommerce.API.Context;
+using ECommerce.API.Interfaces;
 using ECommerce.API.Entities;
 using ECommerce.API.DTOs.UserDtos;
 using Microsoft.AspNetCore.Authorization;
@@ -11,67 +11,62 @@ namespace ECommerce.API.Controllers
     [Authorize]
     public class UsersController : ControllerBase
     {
-        private readonly ECommerceContext _context;
+        // Artık veritabanıyla değil, Aşçımızla (Service) konuşuyoruz!
+        private readonly IUserService _userService;
 
-        public UsersController(ECommerceContext context)
+        public UsersController(IUserService userService)
         {
-            _context = context;
+            _userService = userService;
         }
 
-
         [HttpGet]
-        public IActionResult GetUserList()
+        public async Task<IActionResult> GetUserList()
         {
-            var values = _context.Users.ToList();
+            var values = await _userService.GetAllUsersAsync();
             return Ok(values);
         }
 
-
         [HttpPost]
-        public IActionResult CreateUsers(CreateUserDto dto)
+        public async Task<IActionResult> CreateUsers(CreateUserDto dto)
         {
             User newUser = new User
             {
-                UserName = dto.UserName,  //Süslü parantez { } içinde liste şeklinde özellik belirtiyorsan: Virgül ( , )
+                UserName = dto.UserName,
                 UserSurname = dto.UserSurname,
                 UserEmail = dto.UserEmail,
                 UserPassword = dto.UserPassword,
-                CreatedAt = DateTime.Now  // Tarihi dışarıdan almadık, tam şu anki zamanı otomatik atadık!
+                CreatedAt = DateTime.Now
             };
-            _context.Users.Add(newUser);
-            _context.SaveChanges();
+
+            await _userService.AddUserAsync(newUser);
             return Ok("Yeni Kullanıcı Başarıyla Eklendi!");
         }
 
-
         [HttpDelete("{id}")]
-        public IActionResult DeleteUser(int id)
+        public async Task<IActionResult> DeleteUser(int id)
         {
-            var value = _context.Users.Find(id);
-            if (value == null)
-            {
-                return NotFound("Kullanıcı bulunamadı!");
-            }
-            _context.Users.Remove(value);
-            _context.SaveChanges();
+            await _userService.DeleteUserAsync(id);
             return Ok("Kullanıcı Başarıyla Silindi!");
         }
 
         [HttpPut]
-        public IActionResult UpdatedUser(UpdateUserDto dto)
+        public async Task<IActionResult> UpdateUser(UpdateUserDto dto)
         {
-            var value = _context.Users.Find(dto.UserId);
-            if (value == null)
+            // Önce kullanıcı var mı diye servise soruyoruz
+            var existingUser = await _userService.GetUserByIdAsync(dto.UserId);
+            if (existingUser == null)
             {
                 return NotFound("Kullanıcı bulunamadı!");
             }
-            value.UserName = dto.UserName;  //Alt alta tekil, bağımsız komutlar veriyorsan: Noktalı Virgül ( ; )
-            value.UserSurname = dto.UserSurname;
-            value.UserEmail = dto.UserEmail;
-            value.UserPassword = dto.UserPassword;
+
+            // Varsa bilgilerini DTO'dan gelenlerle değiştiriyoruz
+            existingUser.UserName = dto.UserName;
+            existingUser.UserSurname = dto.UserSurname;
+            existingUser.UserEmail = dto.UserEmail;
+            existingUser.UserPassword = dto.UserPassword;
             // CreatedAt tarihini güncellemiyoruz, ilk kayıt tarihi sabit kalmalı!
 
-            _context.SaveChanges();
+            await _userService.UpdateUserAsync(existingUser);
             return Ok("Kullanıcı Başarıyla Güncellendi!");
         }
     }

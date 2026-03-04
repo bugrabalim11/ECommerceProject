@@ -7,7 +7,7 @@ namespace ECommerce.API.Repositories
     // "Ben IGenericRepository sözleşmesindeki tüm kurallara uyacağım" diyoruz.
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
-        private readonly ECommerceContext _context;
+        protected readonly ECommerceContext _context;
         private readonly DbSet<T> _dbSet;
 
         // Dependency Injection ile veritabanı köprümüzü (Context) içeri alıyoruz

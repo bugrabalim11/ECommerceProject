@@ -1,13 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using ECommerce.API.DTOs.LoginDtos;
-using ECommerce.API.Entities;
-using ECommerce.API.DTOs;
-using ECommerce.API.Context;
+﻿using Microsoft.AspNetCore.Mvc;
+using ECommerce.API.Interfaces;
+using ECommerce.API.DTOs.LoginDtos; // DTO klasörünün adını LoginDtos yapmıştın
 
 namespace ECommerce.API.Controllers
 {
@@ -15,53 +8,28 @@ namespace ECommerce.API.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly ECommerceContext _context;  // Veritabanı bağlantımız
-        private readonly IConfiguration _configuration;  // appsettings'i okumak için
+        // Garson artık sadece Güvenlik Şefini (AuthService) tanıyor, veritabanını değil!
+        private readonly IAuthService _authService;
 
-        public AuthController(ECommerceContext context, IConfiguration configuration)
+        public AuthController(IAuthService authService)
         {
-            _context = context;
-            _configuration = configuration;
+            _authService = authService;
         }
 
-
         [HttpPost("Login")]
-        public IActionResult Login(LoginDto loginDto)
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
-            // 1. KAPI KONTROLÜ: Veritabanında böyle bir kullanıcı var mı? (Adı ve Şifresi eşleşiyor mu?)
-            var user = _context.Users.FirstOrDefault(x => x.UserName == loginDto.UserName && x.UserPassword == loginDto.UserPassword);
+            // 1. Müşterinin verdiği Email ve Şifreyi Güvenlik Şefine yolla
+            var token = await _authService.LoginAsync(loginDto);
 
-            if (user == null)
+            // 2. Eğer Şef null (boş) dönerse, demek ki adam kayıtlı değil veya şifre yanlış
+            if (token == null)
             {
-                return Unauthorized("Kullanıcı adı veya şifre hatalı!");
+                return Unauthorized("Giriş başarısız: Email veya şifre hatalı!"); // 401 Hatası
             }
 
-            // 2. KARTIN İÇİNE YAZILACAKLAR: Kullanıcıyı bulduk. Kartın (Token) içine kimlik bilgilerini yazıyoruz.
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()), // Kullanıcının ID'si
-                new Claim(ClaimTypes.Name, user.UserName), // Kullanıcının Adı
-                new Claim(ClaimTypes.Role, "Admin") // Şimdilik herkese "Admin" yetkisi veriyoruz!
-            };
-
-
-            // 3. ISLAK İMZA: appsettings.json içindeki gizli şifremizi alıp kalemi hazırlıyoruz.
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("jwtsettings:secretkey").Value!));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-
-            // 4. KARTI BAS: Bütün ayarları birleştirip o uzun karmaşık Token'ı üretiyoruz.
-            var token = new JwtSecurityToken(
-                issuer: _configuration.GetSection("jwtsettings:Issuer").Value,
-                audience: _configuration.GetSection("jwtsettings:Audience").Value,
-                claims: claims,
-                expires: DateTime.Now.AddHours(1), // Token 1 saat geçerli olacak
-                signingCredentials: creds
-            );
-
-
-            // 5. KARTI TESLİM ET: Üretilen Token'ı yazıya çevirip kullanıcıya ver.
-            return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
+            // 3. Her şey doğruysa, üretilen Token'ı (VIP Bilekliği) müşteriye ver
+            return Ok(new { Token = token, Message = "Giriş Başarılı!" });
         }
     }
 }

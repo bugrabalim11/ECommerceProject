@@ -1,76 +1,71 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using ECommerce.API.Context;
+﻿using ECommerce.API.Interfaces;
 using ECommerce.API.Entities;
 using ECommerce.API.DTOs.OrderItemDtos;
 using Microsoft.AspNetCore.Authorization;
-
+using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerce.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize] // Kapıda güvenlik var
     public class OrderItemsController : ControllerBase
     {
-        private readonly ECommerceContext _context;
-        public OrderItemsController(ECommerceContext context)
+        // Artık veritabanıyla (Context) değil, servisimizle (Aşçı) konuşuyoruz
+        private readonly IOrderItemService _orderItemService;
+
+        public OrderItemsController(IOrderItemService orderItemService)
         {
-            _context = context;
+            _orderItemService = orderItemService;
         }
 
         [HttpGet]
-        public IActionResult GetOrderItemsList()
+        public async Task<IActionResult> GetOrderItemsList()
         {
-            var values=_context.OrderItems.ToList();
+            var values = await _orderItemService.GetAllOrderItemsAsync();
             return Ok(values);
         }
 
         [HttpPost]
-        public IActionResult CreateOrderItem(CreateOrderItemDto dto)
+        public async Task<IActionResult> CreateOrderItem(CreateOrderItemDto dto)
         {
-            OrderItem newItem = new OrderItem
+            // DTO'yu Entity'ye çevirip servise gönderiyoruz
+            var newItem = new OrderItem
             {
                 OrderId = dto.OrderId,
                 ProductId = dto.ProductId,
                 Quantity = dto.Quantity,
                 UnitPrice = dto.UnitPrice
             };
-            _context.OrderItems.Add(newItem);
-            _context.SaveChanges();
+
+            await _orderItemService.AddOrderItemAsync(newItem);
             return Ok("Sipariş Kalemi Başarıyla Eklendi!");
         }
 
-
         [HttpDelete("{id}")]
-        public IActionResult DeleteOrderItem(int id)
+        public async Task<IActionResult> DeleteOrderItem(int id)
         {
-            var value = _context.OrderItems.Find(id);
-            if (value == null)
-            {
-                return NotFound("Silinecek Sipariş Kalemi Bulunamadı!"); 
-            }
-            _context.OrderItems.Remove(value);
-            _context.SaveChanges();
+            await _orderItemService.DeleteOrderItemAsync(id);
             return Ok("Sipariş Kalemi Başarıyla Silindi!");
         }
 
-
         [HttpPut]
-        public IActionResult UpdateOrdeItem(UpdateOrderItemDto dto)
+        public async Task<IActionResult> UpdateOrderItem(UpdateOrderItemDto dto)
         {
-            var value = _context.OrderItems.Find(dto.Id);
-            if (value == null)
+            // Önce var olup olmadığını servisten kontrol edebiliriz
+            var existingItem = await _orderItemService.GetOrderItemByIdAsync(dto.Id);
+            if (existingItem == null)
             {
                 return NotFound("Güncellenecek Sipariş Kalemi Bulunamadı!");
             }
-            value.OrderId = dto.OrderId;
-            value.ProductId = dto.ProductId;
-            value.Quantity = dto.Quantity;
-            value.UnitPrice = dto.UnitPrice;
 
-            _context.SaveChanges();
-            return Ok("Sipariş Kalemi Başarıyla GÜncellendi!");
+            existingItem.OrderId = dto.OrderId;
+            existingItem.ProductId = dto.ProductId;
+            existingItem.Quantity = dto.Quantity;
+            existingItem.UnitPrice = dto.UnitPrice;
+
+            await _orderItemService.UpdateOrderItemAsync(existingItem);
+            return Ok("Sipariş Kalemi Başarıyla Güncellendi!");
         }
-
     }
 }
