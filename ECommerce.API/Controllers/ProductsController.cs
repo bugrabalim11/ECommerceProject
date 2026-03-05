@@ -1,7 +1,9 @@
-﻿using ECommerce.API.Entities;
+﻿using ECommerce.API.DTOs.ProductDtos;
+using ECommerce.API.Entities;
 using ECommerce.API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using AutoMapper;
 
 namespace ECommerce.API.Controllers
 {
@@ -10,20 +12,22 @@ namespace ECommerce.API.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        // Artık sadece Aşçımızı (Service) çağırıyoruz!
         private readonly IProductService _productService;
+        private readonly IMapper _mapper;
 
-        public ProductsController(IProductService productService)
+        public ProductsController(IProductService productService, IMapper mapper)
         {
             _productService = productService;
+            _mapper = mapper;
         }
 
-        [AllowAnonymous] // Ürünleri listelemek (vitrine bakmak) herkese serbest
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetAllProducts()
         {
-            var products = await _productService.GetAllProductsAsync();
-            return Ok(products);
+            var values = await _productService.GetProductsWithCategoryAsync();
+            var mappedValues = _mapper.Map<List<ResultProductDto>>(values);
+            return Ok(mappedValues);
         }
 
         [AllowAnonymous]
@@ -33,20 +37,28 @@ namespace ECommerce.API.Controllers
             var product = await _productService.GetProductByIdAsync(id);
             if (product == null) return NotFound("Bu ID'ye ait ürün bulunamadı.");
 
-            return Ok(product);
+            // TEK BİR ÜRÜNÜ DTO'YA ÇEVİRİYORUZ
+            var mappedProduct = _mapper.Map<ResultProductDto>(product);
+            return Ok(mappedProduct);
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateProduct([FromBody] Product product)
+        public async Task<IActionResult> CreateProduct(CreateProductDto dto) // HAM PRODUCT YERİNE DTO GELDİ!
         {
-            await _productService.AddProductAsync(product);
+            var newProduct = _mapper.Map<Product>(dto);
+            await _productService.AddProductAsync(newProduct);
             return Ok("Ürün başarıyla eklendi.");
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateProduct([FromBody] Product product)
+        public async Task<IActionResult> UpdateProduct(UpdateProductDto dto) // HAM PRODUCT YERİNE DTO GELDİ!
         {
-            await _productService.UpdateProductAsync(product);
+            var existingProduct = await _productService.GetProductByIdAsync(dto.ProductId);
+            if (existingProduct == null) return NotFound("Ürün bulunamadı!");
+
+            _mapper.Map(dto, existingProduct); // Yeni bilgileri eskisinin üzerine yaz!
+
+            await _productService.UpdateProductAsync(existingProduct);
             return Ok("Ürün başarıyla güncellendi.");
         }
 

@@ -1,4 +1,6 @@
-﻿using ECommerce.API.Entities;
+﻿using AutoMapper;
+using ECommerce.API.DTOs.CategoryDtos;
+using ECommerce.API.Entities;
 using ECommerce.API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,19 +14,21 @@ namespace ECommerce.API.Controllers
     {
         // Artık veritabanını (Context) DEĞİL, Aşçımızı (Service) çağırıyoruz!
         private readonly ICategoryService _categoryService;
+        private readonly IMapper _mapper; // 1. Sihirbazı tanımladık
 
-        public CategoriesController(ICategoryService categoryService)
+        public CategoriesController(ICategoryService categoryService, IMapper mapper)
         {
             _categoryService = categoryService;
+            _mapper = mapper;  // İçeri aldık
         }
 
         [AllowAnonymous] // Vitrinimiz herkese açık
         [HttpGet]
         public async Task<IActionResult> GetAllCategories()
         {
-            // Controller'ın içi ne kadar temizleşti bak: "Aşçı bana tüm kategorileri ver!"
-            var categories = await _categoryService.GetAllCategoriesAsync();
-            return Ok(categories);
+            var values = await _categoryService.GetAllCategoriesAsync();  
+            var mappedValues = _mapper.Map<List<ResultCategoryDto>>(values);  
+            return Ok(mappedValues);
         }
 
         [AllowAnonymous]
@@ -38,17 +42,28 @@ namespace ECommerce.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateCategory([FromBody] Category category)
+        public async Task<IActionResult> CreateCategory(CreateCategoryDto dto)
         {
-            await _categoryService.AddCategoryAsync(category);
+            var newCategory = _mapper.Map<Category>(dto);
+
+            // İŞTE BURASI ÖNEMLİ: Artık aşçının güncel metodunu (AddCategoryAsync) çağırıyoruz!
+            await _categoryService.AddCategoryAsync(newCategory);
+
             return Ok("Kategori başarıyla eklendi.");
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateCategory([FromBody] Category category)
+        public async Task<IActionResult> UpdateCategory(UpdateCategoryDto dto)
         {
-            await _categoryService.UpdateCategoryAsync(category);
-            return Ok("Kategori başarıyla güncellendi.");
+            var existingCategory = await _categoryService.GetCategoryByIdAsync(dto.CategoryId);
+            if (existingCategory == null) return NotFound("Kategori bulunamadı!");
+
+            _mapper.Map(dto, existingCategory); // Yeni bilgileri eskisinin üzerine yaz
+
+            // İŞTE ÇÖZÜM BURADA: await kelimesini ekledik!
+            await _categoryService.UpdateCategoryAsync(existingCategory);
+
+            return Ok("Kategori başarıyla güncellendi!");
         }
 
         [HttpDelete("{id}")]

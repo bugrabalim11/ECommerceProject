@@ -34,10 +34,14 @@ namespace ECommerce.API.Services
             var product = await _productRepository.GetByIdAsync(id);
 
             // Eğer bulduysa, "Şimdi bunu sil" diyoruz.
-            if (product!=null)
+            if (product != null)
             {
                 _productRepository.Delete(product);
             }
+        }
+        public async Task<List<Product>> GetProductsWithCategoryAsync()
+        {
+            return await _productRepository.GetProductsWithCategoryAsync();
         }
     }
 }

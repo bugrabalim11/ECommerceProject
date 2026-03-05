@@ -24,13 +24,6 @@ namespace ECommerce.API.Services
             return await _categoryRepository.GetByIdAsync(id);
         }
 
-        public async Task CreateCategoryAsync(Category category)
-        {
-            // İleride "Aynı isimde kategori var mı?" gibi kuralları buraya yazacağız.
-            // Şimdilik doğrudan depocuya gönderiyoruz.
-            await _categoryRepository.AddAsync(category);
-        }
-
         public async Task UpdateCategoryAsync(Category category)
         {
             _categoryRepository.Update(category);
@@ -49,9 +42,11 @@ namespace ECommerce.API.Services
 
         }
 
-        public Task AddCategoryAsync(Category category)
+        // 1. Metodun isminin yanına 'async' kelimesini ekliyoruz
+        public async Task AddCategoryAsync(Category category)
         {
-            throw new NotImplementedException();
+            // 2. O hata fırlatan satırı SİLİYORUZ ve yerine Depocuyu (Repository) çağırıyoruz:
+            await _categoryRepository.AddAsync(category);
         }
     }
 }

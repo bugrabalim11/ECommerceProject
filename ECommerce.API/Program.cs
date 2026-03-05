@@ -9,6 +9,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using AutoMapper;
+using ECommerce.API.Mappings;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +44,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!))
     };
 });
+
+
+// Sisteme "Gidip MappingProfile sınıfının olduğu yeri bul ve çalıştır" diyoruz.
+builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
 // --- 3. DEPENDENCY INJECTION (İŞÇİ KAYITLARI) ---
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));

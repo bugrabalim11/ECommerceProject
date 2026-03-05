@@ -3,6 +3,7 @@ using ECommerce.API.Interfaces;
 using ECommerce.API.Entities;
 using ECommerce.API.DTOs.UserDtos;
 using Microsoft.AspNetCore.Authorization;
+using AutoMapper;
 
 namespace ECommerce.API.Controllers
 {
@@ -13,30 +14,37 @@ namespace ECommerce.API.Controllers
     {
         // Artık veritabanıyla değil, Aşçımızla (Service) konuşuyoruz!
         private readonly IUserService _userService;
+        private readonly IMapper _mapper;  // 1. Sihirbazı tanımladık
 
-        public UsersController(IUserService userService)
+        public UsersController(IUserService userService, IMapper mapper)
         {
             _userService = userService;
+            _mapper = mapper;  // 2. İçeri aldık
         }
 
         [HttpGet]
         public async Task<IActionResult> GetUserList()
         {
+            // 1. Aşçıdan (Service) ham verileri (şifreli User listesini) alıyoruz.
             var values = await _userService.GetAllUsersAsync();
-            return Ok(values);
+
+            // 2. Sihirbazı devreye sokup bu listeyi GÜVENLİ (şifresiz) DTO listesine çeviriyoruz.
+            var mappedValues = _mapper.Map<List<ResultUserDto>>(values);
+
+            // 3. Müşteriye güvenli listeyi sunuyoruz.
+            return Ok(mappedValues);
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateUsers(CreateUserDto dto)
         {
-            User newUser = new User
-            {
-                UserName = dto.UserName,
-                UserSurname = dto.UserSurname,
-                UserEmail = dto.UserEmail,
-                UserPassword = dto.UserPassword,
-                CreatedAt = DateTime.Now
-            };
+            // YENİ VE PROFESYONEL YÖNTEM:
+            // AutoMapper sihirbazı, DTO'daki her şeyi alıp User nesnesine şıp diye kopyalıyor!
+            var newUser = _mapper.Map<User>(dto);
+
+
+            // Sadece tarihi manuel veriyoruz çünkü kullanıcının girdiği bir şey değil
+            newUser.CreatedAt = DateTime.Now;
 
             await _userService.AddUserAsync(newUser);
             return Ok("Yeni Kullanıcı Başarıyla Eklendi!");
@@ -59,12 +67,10 @@ namespace ECommerce.API.Controllers
                 return NotFound("Kullanıcı bulunamadı!");
             }
 
-            // Varsa bilgilerini DTO'dan gelenlerle değiştiriyoruz
-            existingUser.UserName = dto.UserName;
-            existingUser.UserSurname = dto.UserSurname;
-            existingUser.UserEmail = dto.UserEmail;
-            existingUser.UserPassword = dto.UserPassword;
-            // CreatedAt tarihini güncellemiyoruz, ilk kayıt tarihi sabit kalmalı!
+            // 2. SİHİRBAZIN İKİNCİ YETENEĞİ: Var olan nesneyi güncelleme!
+            // Eskiden "existingUser.UserName = dto.UserName" diye tek tek yazdığımız yeri tek satıra düşürdük.
+            // Bu kod "dto'nun içindeki yeni bilgileri al, existingUser'ın üzerine yapıştır" demek.
+            _mapper.Map(dto, existingUser);
 
             await _userService.UpdateUserAsync(existingUser);
             return Ok("Kullanıcı Başarıyla Güncellendi!");

@@ -32,16 +32,22 @@ namespace ECommerce.API.Repositories
         public async Task AddAsync(T entity)
         {
             await _dbSet.AddAsync(entity);
+            // İŞTE EKSİK OLAN KAHRAMAN KOMUT BURADA:
+            await _context.SaveChangesAsync();
         }
 
         public void Update(T entity)
         {
             _dbSet.Update(entity);
+            // GÜNCELLEME İÇİN DE KAYDETMEK ŞART:
+            _context.SaveChanges();
         }
 
         public void Delete(T entity)
         {
             _dbSet.Remove(entity);
+            // SİLME İŞLEMİ İÇİN DE KAYDETMEK ŞART:
+            _context.SaveChanges();
         }
     }
 }
