@@ -3,6 +3,7 @@ using ECommerce.API.Entities;
 using ECommerce.API.DTOs.OrderDtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using AutoMapper;
 
 namespace ECommerce.API.Controllers
 {
@@ -12,32 +13,43 @@ namespace ECommerce.API.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly IOrderService _orderService;
+        private readonly IMapper _mapper;
 
-        public OrdersController(IOrderService orderService)
+
+        // Garson işe başlarken Aşçıyı (Service) ve Sihirbazı (Mapper) yanına alır.
+        public OrdersController(IOrderService orderService, IMapper mapper)
         {
             _orderService = orderService;
+            _mapper = mapper;
+        }
+
+
+        // YENİ VE HAVALI METODUMUZ!
+        [HttpGet("GetOrderWithDetails")]
+        public async Task<IActionResult> GetOrdersWithDetails()
+        {
+            // 1. Aşçıdan (Service) veritabanındaki tüm ham siparişleri detaylarıyla çek.
+            var values = await _orderService.GetOrdersWithDetailsAsync();
+
+            // 2. Sihirbaza (AutoMapper) ver, o bize vitrinlik (DTO) listesi versin.
+            var mappedValues = _mapper.Map<List<ResultOrderDto>>(values);
+
+            // 3. Masaya (Swagger/İstemci) servis et!
+            return Ok(mappedValues);
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetOrderList()
+        public async Task<IActionResult> GetAllOrders()
         {
-            // Tüm o Include'lar, Select'ler artık Service'in içinde gizli. 
-            // Controller artık çok ferah!
-            var values = await _orderService.GetOrdersWithDetailsAsync();
-            return Ok(values);
+            var values = await _orderService.GetAllOrdersAsync();
+            return Ok(_mapper.Map<List<ResultOrderDto>>(values));
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateOrder(CreateOrderDto dto)
         {
-            var order = new Order
-            {
-                UserId = dto.UserId,
-                OrderTotalAmount = dto.OrderTotalAmount,
-                OrderDate = DateTime.Now,
-                OrderStatus = "Sipariş Alındı!"
-            };
-            await _orderService.AddOrderAsync(order);
+            var value = _mapper.Map<Order>(dto);
+            await _orderService.AddOrderAsync(value);
             return Ok("Sipariş Başarıyla Oluşturuldu!");
         }
 
@@ -51,14 +63,14 @@ namespace ECommerce.API.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateOrder(UpdateOrderDto dto)
         {
-            var value = await _orderService.GetOrderByIdAsync(dto.OrderId);
-            if (value == null) return NotFound("Güncellenecek Sipariş bulunamadı!");
+            var existingOrder = await _orderService.GetOrderByIdAsync(dto.OrderId);
+            if (existingOrder != null)
+            {
+                return NotFound("Güncellenecek sipariş bulunamadı!");
+            }
 
-            value.UserId = dto.UserId;
-            value.OrderTotalAmount = dto.OrderTotalAmount;
-            value.OrderStatus = dto.OrderStatus;
-
-            await _orderService.UpdateOrderAsync(value);
+            _mapper.Map(dto, existingOrder);
+            await _orderService.UpdateOrderAsync(existingOrder!);
             return Ok("Sipariş Başarıyla Güncellendi!");
         }
     }

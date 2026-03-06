@@ -35,5 +35,9 @@ namespace ECommerce.API.Services
                 _orderItemRepository.Delete(orderItem);
             }
         }
+        public async Task<List<OrderItem>> GetOrderItemsWithProductAsync()
+        {
+            return await _orderItemRepository.GetOrderItemsWithProductAsync();
+        }
     }
 }

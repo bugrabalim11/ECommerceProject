@@ -23,7 +23,7 @@ namespace ECommerce.API.Interfaces
         // 5. Sadece ID'sini vererek bir siparişi veritabanından tamamen silme sözü.
         Task DeleteOrderAsync(int id);
 
-        // Diğer metotların yanına bunu ekle:
-        Task<List<ResultOrderDto>> GetOrdersWithDetailsAsync();
+        // AŞÇININ YENİ GÖREVİ:
+        Task<List<Order>> GetOrdersWithDetailsAsync();
     }
 }

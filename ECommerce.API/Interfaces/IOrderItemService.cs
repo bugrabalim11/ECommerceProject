@@ -9,5 +9,6 @@ namespace ECommerce.API.Interfaces
         Task AddOrderItemAsync(OrderItem orderItem);
         Task UpdateOrderItemAsync(OrderItem orderItem);
         Task DeleteOrderItemAsync(int id);
+        Task<List<OrderItem>> GetOrderItemsWithProductAsync();
     }
 }

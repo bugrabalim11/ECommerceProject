@@ -1,8 +1,5 @@
-﻿using ECommerce.API.DTOs.OrderDtos;
-using ECommerce.API.DTOs.OrderItemDtos;
-using ECommerce.API.Entities;
+﻿using ECommerce.API.Entities;
 using ECommerce.API.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace ECommerce.API.Services
 {
@@ -46,28 +43,11 @@ namespace ECommerce.API.Services
             }
         }
 
-        public async Task<List<ResultOrderDto>> GetOrdersWithDetailsAsync()
-        {
-            // Controller'dan kopyaladığımız o karmaşık sorgu artık burada, uzman elinde!
-            return await _orderRepository.Table // Depocunun tablosuna ulaşıyoruz
-                .Include(x => x.User)
-                .Include(x => x.OrderItems)
-                .ThenInclude(y => y.Product)
-                .Select(z => new ResultOrderDto
-                {
-                    OrderId = z.OrderId,
-                    CustomerFullName = z.User.UserName + " " + z.User.UserSurname,
-                    OrderDate = z.OrderDate,
-                    OrderTotalAmount = z.OrderTotalAmount,
-                    OrderStatus = z.OrderStatus,
-                    Items = z.OrderItems.Select(w => new ResultOrderItemDto
-                    {
-                        ProductName = w.Product.ProductName,
-                        Quantity = w.Quantity,
-                        UnitPrice = w.UnitPrice
-                    }).ToList()
-                }).ToListAsync();
-        }
 
+        // --- DİĞER İKİ METODU SİLİP SADECE BUNU BIRAKIYORUZ ---
+        public async Task<List<Order>> GetOrdersWithDetailsAsync()
+        {
+            return await _orderRepository.GetOrdersWithDetailsAsync();
+        }
     }
 }

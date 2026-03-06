@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
-using ECommerce.API.Entities;
-using ECommerce.API.DTOs.UserDtos;
 using ECommerce.API.DTOs.CategoryDtos;
+using ECommerce.API.DTOs.OrderDtos;
+using ECommerce.API.DTOs.OrderItemDtos;
 using ECommerce.API.DTOs.ProductDtos;
+using ECommerce.API.DTOs.UserDtos;
+using ECommerce.API.Entities;
 
 namespace ECommerce.API.Mappings
 {
@@ -18,10 +20,16 @@ namespace ECommerce.API.Mappings
             CreateMap<User, UpdateUserDto>().ReverseMap();
             CreateMap<User, ResultUserDto>().ReverseMap();
 
+
+
+
             // --- KATEGORİ (CATEGORY) HARİTALARI ---
             CreateMap<Category, CreateCategoryDto>().ReverseMap();
             CreateMap<Category, UpdateCategoryDto>().ReverseMap();
             CreateMap<Category, ResultCategoryDto>().ReverseMap();
+
+
+
 
             // --- ÜRÜN (PRODUCT) HARİTALARI ---
 
@@ -36,6 +44,32 @@ namespace ECommerce.API.Mappings
             CreateMap<Product, ResultProductDto>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.CategoryName))
                 .ReverseMap();
+
+
+
+            // --- SİPARİŞ DETAYI (ORDER ITEM) HARİTALARI ---
+            CreateMap<OrderItem, ResultOrderItemDto>()
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.ProductName))
+                .ReverseMap();
+
+            // ŞU İKİ SATIRI EKLİYORUZ (Ekleme ve Güncelleme işlemleri için):
+            CreateMap<OrderItem, CreateOrderItemDto>().ReverseMap();
+            CreateMap<OrderItem, UpdateOrderItemDto>().ReverseMap();
+
+
+
+
+            // --- SİPARİŞ (ORDER) HARİTALARI ---
+            // İŞTE EKSİK OLAN KAHRAMAN SATIRIMIZ BURADA:
+            CreateMap<Order, ResultOrderDto>()
+                // 1. Yol Tarifi: İsim ve Soyismi birleştir
+                .ForMember(dest => dest.CustomerFullName, opt => opt.MapFrom(src => src.User.UserName + " " + src.User.UserSurname))
+                // 2. YENİ Yol Tarifi: OrderItems listesini Items listesine bağla!
+                .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.OrderItems))
+                .ReverseMap();
+
+            CreateMap<Order, CreateOrderDto>().ReverseMap();
+            CreateMap<Order, UpdateOrderDto>().ReverseMap();
         }
     }
 }
