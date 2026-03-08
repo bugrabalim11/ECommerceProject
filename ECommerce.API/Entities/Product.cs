@@ -13,5 +13,8 @@
         // İlişki: Bu ürün hangi kategoriye ait?
         public Category Category { get; set; } = null!;
 
+
+        public string? imageUrl { get; set; }   // Soru işareti null olabilir demek
+
     }
 }

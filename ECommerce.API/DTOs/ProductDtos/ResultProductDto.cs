@@ -10,5 +10,6 @@
         // DİKKAT: CategoryId veya koca Category nesnesi yerine, 
         // SADECE kategorinin adını alacağız! Mimari güzellik buradadır.
         public string CategoryName { get; set; } = string.Empty;
+        public string? imageUrl { get; set; }
     }
 }

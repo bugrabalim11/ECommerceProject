@@ -35,6 +35,7 @@ namespace ECommerce.API.Controllers
             return Ok(mappedValues);
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> CreateUsers(CreateUserDto dto)
         {

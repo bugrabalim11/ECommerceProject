@@ -50,6 +50,34 @@ namespace ECommerce.API.Controllers
             return Ok("Ürün başarıyla eklendi.");
         }
 
+        [HttpPost("UploadImage")]
+        public async Task<IActionResult> UploadImage(IFormFile file)
+        {
+            // 1. Gelen bir dosya var mı kontrol et
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("Lütfen geçerli bir resim dosyası seçin.");
+            }
+
+            // 2. Dosyanın uzantısını al (örn: .jpg, .png)
+            var extension = Path.GetExtension(file.FileName);
+
+            // 3. Resme benzersiz bir isim ver (Aynı isimde iki resim çakışmasın)
+            var newImageName = Guid.NewGuid() + extension;
+
+            // 4. Resmin kaydedileceği tam yolu belirle (wwwroot/images klasörü)
+            var location = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images", newImageName);
+
+            // 5. Resmi fiziksel olarak o klasöre kopyala
+            using (var stream = new FileStream(location, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            // 6. Başarılı olursa resmin yeni adını geri dön!
+            return Ok(new { Message = "Resim başarıyla yüklendi!", ImageUrl = "/images/" + newImageName });
+        }
+
         [HttpPut]
         public async Task<IActionResult> UpdateProduct(UpdateProductDto dto) // HAM PRODUCT YERİNE DTO GELDİ!
         {
