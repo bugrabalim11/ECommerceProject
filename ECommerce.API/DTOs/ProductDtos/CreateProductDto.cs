@@ -7,6 +7,6 @@
         public string ProductDescription { get; set; } = string.Empty;
         public decimal ProductPrice {  get; set; }
         public int StockQuantity { get; set; }
-        public string? imageUrl { get; set; }
+        public string? ImageUrl { get; set; }
     }
 }
