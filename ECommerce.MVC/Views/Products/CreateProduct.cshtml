@@ -1,0 +1,55 @@
+﻿@model ECommerce.MVC.DTOs.ProductDtos.CreateProductDto
+
+@{
+    ViewData["Title"] = "Yeni Ürün Ekle";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-success text-white py-3">
+                    <h4 class="mb-0"><i class="fa-solid fa-plus-circle me-2"></i>Yeni Ürün Ekle</h4>
+                </div>
+                <div class="card-body p-4">
+
+                    <form method="post">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Ürün Adı</label>
+                            <input type="text" asp-for="ProductName" class="form-control" placeholder="Örn: iPhone 16 Pro" required>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Fiyat (₺)</label>
+                                <input type="number" step="0.01" asp-for="ProductPrice" class="form-control" placeholder="Örn: 75000" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Kategori ID</label>
+                                <input type="number" asp-for="CategoryId" class="form-control" placeholder="Örn: 1" required>
+                                <small class="text-muted">Şimdilik kategori numarasını manuel girin (Örn: 1)</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Ürün Resmi (Link)</label>
+                            <input type="text" asp-for="İmageUrl" class="form-control" placeholder="Örn: https://site.com/resim.jpg" required>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-controller="Products" asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fa-solid fa-arrow-left me-1"></i> Listeye Dön
+                            </a>
+                            <button type="submit" class="btn btn-success fw-bold px-4">
+                                <i class="fa-solid fa-save me-1"></i> Ürünü Kaydet
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

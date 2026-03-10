@@ -2,12 +2,25 @@
 
 @{
     ViewData["Title"] = "Ürünlerimiz";
+
+    // Cüzdanda JWT Token var mı diye bakıyoruz
+    bool isLoggedin = Context.Request.Cookies.ContainsKey("ECommerceJwt");
 }
 
 <div class="container mt-2">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold text-dark">Mağazadaki Ürünler</h2>
-        <span class="badge bg-dark px-3 py-2">Toplam @(Model?.Count ?? 0) Ürün</span>
+
+        <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-dark px-3 py-2">Toplam @(Model?.Count ?? 0) Ürün</span>
+
+            @if (isLoggedin)
+            {
+                <a asp-controller="Products" asp-action="CreateProduct" class="btn btn-success fw-bold shadow-sm">
+                    <i class="fa-solid fa-plus me-1"></i> Yeni Ürün Ekle
+                </a>
+            }
+        </div>
     </div>
 
     <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
@@ -19,7 +32,15 @@
                     <div class="card h-100 shadow-sm border-0">
                         @if (!string.IsNullOrEmpty(item.ImageUrl))
                         {
-                            <img src="https://localhost:7107@(item.ImageUrl)" class="card-img-top p-3" alt="@item.ProductName" style="height: 220px; object-fit: contain;">
+                            // İŞTE YENİ AKILLI RESİM KONTROLÜMÜZ:
+                            if (item.ImageUrl.StartsWith("http"))
+                            {
+                                <img src="@item.ImageUrl" class="card-img-top p-3" alt="@item.ProductName" style="height: 220px; object-fit: contain;">
+                            }
+                            else
+                            {
+                                <img src="https://localhost:7107@(item.ImageUrl)" class="card-img-top p-3" alt="@item.ProductName" style="height: 220px; object-fit: contain;">
+                            }
                         }
                         else
                         {
@@ -34,6 +55,20 @@
 
                             <div class="mt-auto">
                                 <h4 class="text-primary fw-bold mb-3">@item.ProductPrice.ToString("C2")</h4>
+
+                                @if (isLoggedin)
+                                {
+                                    <div class="d-flex gap-2 mb-2">
+                                        <a asp-controller="Products" asp-action="UpdateProduct" asp-route-id="@item.ProductId" class="btn btn-sm btn-warning w-50 fw-bold text-dark">
+                                            <i class="fa-solid fa-pen"></i> Güncelle
+                                        </a>
+
+                                        <a asp-controller="Products" asp-action="DeleteProduct" asp-route-id="@item.ProductId" class="btn btn-sm btn-danger w-50 fw-bold" onclick="return confirm('Bu ürünü silmek istediğinize emin misiniz?');">
+                                            <i class="fa-solid fa-trash"></i> Sil
+                                        </a>
+                                    </div>
+                                }
+
                                 <a href="#" class="btn btn-outline-primary w-100 rounded-pill">
                                     <i class="fa-solid fa-cart-plus me-1"></i>Sepete Ekle
                                 </a>
