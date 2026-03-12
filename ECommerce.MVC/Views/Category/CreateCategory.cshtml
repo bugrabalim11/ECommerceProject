@@ -1,0 +1,46 @@
+﻿@model ECommerce.MVC.DTOs.CategoryDtos.CreateCategoryDto
+
+@{
+    ViewData["Title"] = "Yeni Kategori Ekle";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-success text-white py-3">
+                    <h4 class="mb-0"><i class="fa-solid fa-plus me-2"></i>Yeni Kategori Ekle</h4>
+                </div>
+                <div class="card-body p-4">
+
+                    <form asp-controller="Category" asp-action="CreateCategory" method="post">
+
+                        @* 1. Kategori Adı *@
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Kategori Adı</label>
+                            <input type="text" asp-for="CategoryName" class="form-control" required placeholder="Örn: Akıllı Telefon, Bilgisayar, Ev Aletleri..." />
+                        </div>
+
+                        @* 2. Açıklama *@
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Kategori Açıklaması</label>
+                            <textarea asp-for="CategoryDescription" class="form-control" rows="3" placeholder="Bu kategoride ne tür ürünler yer alacak? Kısaca açıklayın."></textarea>
+                        </div>
+
+                        @* 3. Butonlar *@
+                        <div class="d-flex justify-content-between">
+                            <a asp-controller="Category" asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fa-solid fa-arrow-left me-1"></i> Vazgeç
+                            </a>
+                            <button type="submit" class="btn btn-success fw-bold px-4">
+                                <i class="fa-solid fa-save me-1"></i> Kaydet
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

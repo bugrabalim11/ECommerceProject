@@ -1,0 +1,49 @@
+﻿@model ECommerce.MVC.DTOs.CategoryDtos.UpdateCategoryDto
+
+@{
+    ViewData["Title"] = "Kategori Güncelle";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-warning text-dark py-3">
+                    <h4 class="mb-0 fw-bold"><i class="fa-solid fa-pen me-2"></i>Kategori Güncelle</h4>
+                </div>
+                <div class="card-body p-4">
+
+                    <form asp-controller="Category" asp-action="UpdateCategory" method="post">
+
+                        @* GİZLİ KİMLİK: Kullanıcı görmez ama aşçı (API) güncellenecek ID'yi buradan anlar *@
+                        <input type="hidden" asp-for="CategoryId" />
+
+                        @* 1. Kategori Adı *@
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Kategori Adı</label>
+                            <input type="text" asp-for="CategoryName" class="form-control" required />
+                        </div>
+
+                        @* 2. Açıklama *@
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Kategori Açıklaması</label>
+                            <textarea asp-for="CategoryDescription" class="form-control" rows="3"></textarea>
+                        </div>
+
+                        @* 3. Butonlar *@
+                        <div class="d-flex justify-content-between">
+                            <a asp-controller="Category" asp-action="Index" class="btn btn-outline-secondary fw-bold">
+                                <i class="fa-solid fa-arrow-left me-1"></i> İptal
+                            </a>
+                            <button type="submit" class="btn btn-warning fw-bold px-4 text-dark shadow-sm">
+                                <i class="fa-solid fa-save me-1"></i> Değişiklikleri Kaydet
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
