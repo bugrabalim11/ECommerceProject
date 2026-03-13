@@ -15,7 +15,7 @@
 
                     <form asp-controller="Products" asp-action="UpdateProduct" method="post">
 
-                        @* 1. Gizli ID Alanı *@
+                        @* BUNA ASLA DOKUNMUYORUZ: API hangi ürünü güncelleyeceğini buradan anlıyor *@
                         <input type="hidden" asp-for="ProductId" />
 
                         @* 2. Ürün Adı *@
@@ -30,9 +30,11 @@
                                 <label class="form-label fw-bold">Fiyat (₺)</label>
                                 <input type="number" step="0.01" asp-for="ProductPrice" class="form-control" required />
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Kategori ID</label>
-                                <input type="number" asp-for="CategoryId" class="form-control" required />
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Kategori</label>
+                                <select asp-for="CategoryId" class="form-select" asp-items="@ViewBag.CategoryList" required>
+                                    <option value="" disabled>Lütfen Bir Kategori Seçiniz...</option>
+                                </select>
                             </div>
                         </div>
 

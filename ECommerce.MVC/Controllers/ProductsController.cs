@@ -3,6 +3,8 @@ using System.Text.Json;
 using ECommerce.MVC.DTOs.ProductDtos;
 using System.Text;
 using System.Net.Http.Headers;
+using ECommerce.MVC.DTOs.CategoryDtos;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace ECommerce.MVC.Controllers
 {
@@ -44,15 +46,36 @@ namespace ECommerce.MVC.Controllers
 
         // 3. Ürün Ekleme Formunu Ekrana Getiren Metot
         [HttpGet]
-        public IActionResult CreateProduct()
+        public async Task<IActionResult> CreateProduct()
         {
-            // Cüzdana bakıyoruz
+            // --- SENİN HARİKA TESPİTİN: GÜVENLİK DUVARI ---
             var token = Request.Cookies["ECommerceJwt"];
+            if (string.IsNullOrEmpty(token)) return RedirectToAction("Index", "Login");
+            // ----------------------------------------------
 
-            if (string.IsNullOrEmpty(token))
+            var client = _httpClientFactory.CreateClient();
+
+            // 1. Ürün ekleme sayfasını açmadan önce, API'den Kategori listesini çekiyoruz
+            var responseMessage = await client.GetAsync("https://localhost:7107/api/Categories");
+
+            if (responseMessage.IsSuccessStatusCode)
             {
-                // Anahtar yoksa Login'e yolla
-                return RedirectToAction("Index", "Login");
+                var jsonData = await responseMessage.Content.ReadAsStringAsync();
+                var values = JsonSerializer.Deserialize<List<ResultCategoryDto>>(jsonData, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                // 2. Gelen veriyi HTML'deki Dropdown'un (Açılır Liste) anlayacağı dile (SelectListItem) çeviriyoruz
+                List<SelectListItem> categoryValues = (from x in values
+                                                       select new SelectListItem
+                                                       {
+                                                           Text = x.CategoryName,   // Ekranda görünecek yazı (Örn: Telefon)
+                                                           Value = x.CategoryId.ToString()  // Arka planda seçilecek ID (Örn: 1)
+                                                       }).ToList();
+
+                // 3. Bu listeyi ViewBag adlı sihirli çantaya koyup View'a gönderiyoruz
+                ViewBag.CategoryList = categoryValues;
             }
 
             return View();
@@ -112,22 +135,40 @@ namespace ECommerce.MVC.Controllers
         [HttpGet]
         public async Task<IActionResult> UpdateProduct(int id)
         {
+            // Güvenlik Duvarı
+            var token = Request.Cookies["ECommerceJwt"];
+            if (string.IsNullOrEmpty(token)) return RedirectToAction("Index", "Login");
+
             var client = _httpClientFactory.CreateClient();
 
-            // Önce API'ye gidip "Bana şu ürünün bilgilerini getir, kutuları dolduracağım" diyoruz
+            // --- 1. EKLENEN KISIM: KATEGORİ LİSTESİNİ ÇEK ---
+            var categoryResponse = await client.GetAsync("https://localhost:7107/api/Categories");
+            if (categoryResponse.IsSuccessStatusCode)
+            {
+                var categoryJson = await categoryResponse.Content.ReadAsStringAsync();
+                var categories = JsonSerializer.Deserialize<List<ResultCategoryDto>>(categoryJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                List<SelectListItem> categoryValues = (from x in categories
+                                                       select new SelectListItem
+                                                       {
+                                                           Text = x.CategoryName,
+                                                           Value = x.CategoryId.ToString()
+                                                       }).ToList();
+                ViewBag.CategoryList = categoryValues;
+            }
+            // ------------------------------------------------
+
+            // 2. GÜNCELLENECEK ÜRÜNÜN BİLGİLERİ (Zaten Vardı)
             var responseMessage = await client.GetAsync($"https://localhost:7107/api/Products/{id}");
 
             if (responseMessage.IsSuccessStatusCode)
             {
                 var jsonData = await responseMessage.Content.ReadAsStringAsync();
-
-                // Gelen veriyi UpdateProductDto çantasına yerleştiriyoruz
                 var value = JsonSerializer.Deserialize<UpdateProductDto>(jsonData, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 });
 
-                // Dolu çantayı güncelleme sayfasına gönderiyoruz
                 return View(value);
             }
 
