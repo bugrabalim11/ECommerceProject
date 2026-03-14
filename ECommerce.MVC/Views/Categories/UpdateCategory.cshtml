@@ -13,7 +13,7 @@
                 </div>
                 <div class="card-body p-4">
 
-                    <form asp-controller="Category" asp-action="UpdateCategory" method="post">
+                    <form asp-controller="Categories" asp-action="UpdateCategory" method="post">
 
                         @* GİZLİ KİMLİK: Kullanıcı görmez ama aşçı (API) güncellenecek ID'yi buradan anlar *@
                         <input type="hidden" asp-for="CategoryId" />
@@ -32,7 +32,7 @@
 
                         @* 3. Butonlar *@
                         <div class="d-flex justify-content-between">
-                            <a asp-controller="Category" asp-action="Index" class="btn btn-outline-secondary fw-bold">
+                            <a asp-controller="Categories" asp-action="Index" class="btn btn-outline-secondary fw-bold">
                                 <i class="fa-solid fa-arrow-left me-1"></i> İptal
                             </a>
                             <button type="submit" class="btn btn-warning fw-bold px-4 text-dark shadow-sm">

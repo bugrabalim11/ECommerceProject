@@ -35,6 +35,19 @@ namespace ECommerce.API.Controllers
             return Ok(mappedValues);
         }
 
+        [HttpGet("{id}")] // İşte eksik olan sihirli satır bu!
+        public async Task<IActionResult> GetUserById(int id)
+        {
+            var value = await _userService.GetUserByIdAsync(id);
+            if (value == null)
+            {
+                return NotFound("Kullanıcı bulunamadı!");
+            }
+            // Veriyi DTO'ya çevirip gönderiyoruz
+            var mappedValue = _mapper.Map<UpdateUserDto>(value);
+            return Ok(mappedValue);
+        }
+
         [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> CreateUsers(CreateUserDto dto)
@@ -58,8 +71,8 @@ namespace ECommerce.API.Controllers
             return Ok("Kullanıcı Başarıyla Silindi!");
         }
 
-        [HttpPut]
-        public async Task<IActionResult> UpdateUser(UpdateUserDto dto)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(int id, UpdateUserDto dto)
         {
             // Önce kullanıcı var mı diye servise soruyoruz
             var existingUser = await _userService.GetUserByIdAsync(dto.UserId);

@@ -6,11 +6,11 @@ using System.Net.Http.Headers;
 
 namespace ECommerce.MVC.Controllers
 {
-    public class CategoryController : Controller
+    public class CategoriesController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
 
-        public CategoryController(IHttpClientFactory httpClientFactory)
+        public CategoriesController(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
         }

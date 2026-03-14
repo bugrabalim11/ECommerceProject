@@ -1,0 +1,49 @@
+﻿@model ECommerce.MVC.DTOs.UserDtos.UpdateUserDto
+
+@{
+    ViewData["Title"] = "Kullanıcı Güncelleme";
+    // Layout satırını sildik, çünkü sistem _ViewStart'tan otomatik alacak.
+}
+
+<div class="container-fluid mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Kullanıcı Bilgilerini Güncelle</h4>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                @* 1. ID Gizli Alanı *@
+                <input type="hidden" asp-for="UserId" />
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Kullanıcı Adı (Giriş Adı)</label>
+                        @* asp-for değerleri senin DTO'ndaki isimlerle birebir aynı olmalı *@
+                        <input type="text" asp-for="UserName" class="form-control" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Soyad</label>
+                        <input type="text" asp-for="UserSurname" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">E-Posta</label>
+                    <input type="email" asp-for="UserEmail" class="form-control" />
+                </div>
+
+                @* Şifreyi güncellemek istemeyebilirsin ama DTO'nda var, 
+                   boş gitmemesi için gizli veya readonly yapabiliriz *@
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Şifre (Opsiyonel)</label>
+                    <input type="password" asp-for="UserPassword" class="form-control" placeholder="Yeni şifre girmeyecekseniz eskiyi yazın" />
+                </div>
+
+                <div class="mt-4 border-top pt-3">
+                    <a href="/Users/Index" class="btn btn-secondary">İptal</a>
+                    <button type="submit" class="btn btn-success">Değişiklikleri Uygula</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
