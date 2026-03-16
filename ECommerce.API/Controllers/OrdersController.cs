@@ -45,11 +45,31 @@ namespace ECommerce.API.Controllers
             return Ok(_mapper.Map<List<ResultOrderDto>>(values));
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetOrder(int id)
+        {
+            var value = await _orderService.GetOrderByIdAsync(id);
+
+            // SİHİRLİ DOKUNUŞ: Ham nesneyi doğrudan dönmek yerine UpdateOrderDto'ya çeviriyoruz!
+            // Böylece ilişkili tabloların yarattığı sonsuz döngüden kurtuluyoruz.
+            var mappedValue = _mapper.Map<UpdateOrderDto>(value);
+
+            return Ok(mappedValue);
+        } 
+
+
         [HttpPost]
         public async Task<IActionResult> CreateOrder(CreateOrderDto dto)
         {
+            // 1. DTO'dan gelen verileri (müşteri adı, tutar vs.) Order nesnesine kopyala
             var value = _mapper.Map<Order>(dto);
+
+            // 2. SİHİRLİ DOKUNUŞ: Siparişin oluşturulduğu o anki tarihi (sunucu saatini) bas!
+            value.OrderDate = DateTime.Now;
+
+            // 3. Veritabanına kaydet
             await _orderService.AddOrderAsync(value);
+
             return Ok("Sipariş Başarıyla Oluşturuldu!");
         }
 
@@ -63,8 +83,11 @@ namespace ECommerce.API.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateOrder(UpdateOrderDto dto)
         {
+            // DİKKAT: Senin kodunda burası != null şeklindeydi. 
+            // Yani "Eğer sipariş veritabanında VARSA, bulunamadı hatası ver" diyordun.
+            // Doğrusu "Eğer sipariş YOKSA (== null) hata ver" olmalıdır.
             var existingOrder = await _orderService.GetOrderByIdAsync(dto.OrderId);
-            if (existingOrder != null)
+            if (existingOrder == null)
             {
                 return NotFound("Güncellenecek sipariş bulunamadı!");
             }
