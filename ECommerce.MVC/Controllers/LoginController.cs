@@ -43,14 +43,14 @@ namespace ECommerce.MVC.Controllers
                 // 3. İçindeki sadece "token" yazan kısmı cımbızla çekiyoruz
                 var tokenData = jsonDocument.RootElement.GetProperty("token").GetString();
 
-                // Artık cüzdana saf anahtarı koyuyoruz!
-                // tokenData'nın yanına ?? "" ekledik. 
-                // Anlamı: "tokenData null ise, onun yerine boş tırnak (hiçlik) koy."
-                Response.Cookies.Append("ECommerceJwt", tokenData ?? "", new CookieOptions
+                // DİKKAT: Sihirli dokunuşlar CookieOptions içine eklendi!
+                // Çerezin ADINI ECommerceToken olarak değiştirdik ve ayarları çok sadeleştirdik!
+                Response.Cookies.Append("ECommerceToken", tokenData ?? "", new CookieOptions
                 {
                     HttpOnly = true,
-                    SameSite = SameSiteMode.Strict,
+                    Path = "/",    // Tüm sayfalarda geçerli
                     Expires = DateTime.Now.AddDays(1)
+                    // Secure ve SameSite yok! Localhost'ta bize engel olmasınlar.
                 });
 
                 return RedirectToAction("Index", "Products");

@@ -1,4 +1,4 @@
-﻿using ECommerce.MVC.DTOs.OrderItemDto;
+﻿using ECommerce.MVC.DTOs.OrderItemDtos;
 
 namespace ECommerce.MVC.DTOs.OrderDtos
 {

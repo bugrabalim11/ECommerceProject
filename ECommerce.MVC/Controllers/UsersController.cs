@@ -19,7 +19,7 @@ namespace ECommerce.MVC.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var token = Request.Cookies["ECommerceJwt"];
+            var token = Request.Cookies["ECommerceToken"];
             if (string.IsNullOrEmpty(token)) return RedirectToAction("Index", "Login");
 
             var client = _httpClientFactory.CreateClient();
@@ -43,7 +43,7 @@ namespace ECommerce.MVC.Controllers
         [HttpGet]
         public async Task<IActionResult> UpdateUser(int id)
         {
-            var token = Request.Cookies["ECommerceJwt"];
+            var token = Request.Cookies["ECommerceToken"];
             if (string.IsNullOrEmpty(token)) return RedirectToAction("Index", "Login");
 
             var client = _httpClientFactory.CreateClient();
@@ -70,7 +70,7 @@ namespace ECommerce.MVC.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateUser(UpdateUserDto updateUserDto)
         {
-            var token = Request.Cookies["ECommerceJwt"];
+            var token = Request.Cookies["ECommerceToken"];
             if (string.IsNullOrEmpty(token)) return RedirectToAction("Index", "Login");
 
             var client = _httpClientFactory.CreateClient();
@@ -95,7 +95,7 @@ namespace ECommerce.MVC.Controllers
         [HttpGet]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            var token = Request.Cookies["ECommerceJwt"];
+            var token = Request.Cookies["ECommerceToken"];
             if (string.IsNullOrEmpty(token)) return RedirectToAction("Index", "Login");
 
             var client = _httpClientFactory.CreateClient();

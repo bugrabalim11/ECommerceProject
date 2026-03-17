@@ -41,7 +41,7 @@ namespace ECommerce.MVC.Controllers
         public async Task<IActionResult> CreateCategory(CreateCategoryDto createCategoryDto)
         {
             // 1. Cüzdana bak, anahtar yoksa Login kapısına yolla!
-            var token = Request.Cookies["ECommerceJwt"];
+            var token = Request.Cookies["ECommerceToken"];
             if (string.IsNullOrEmpty(token)) return RedirectToAction("Index", "Login");
 
             var client = _httpClientFactory.CreateClient();
@@ -67,7 +67,7 @@ namespace ECommerce.MVC.Controllers
         public async Task<IActionResult> DeleteCategory(int id)
         {
             // 1. Cüzdandaki anahtarı alalım
-            var token = Request.Cookies["ECommerceJwt"];
+            var token = Request.Cookies["ECommerceToken"];
 
             // 2. Anahtar yoksa veya süresi bittiyse direkt Login kapısına yolla
             if (string.IsNullOrEmpty(token))
@@ -114,7 +114,7 @@ namespace ECommerce.MVC.Controllers
         public async Task<IActionResult> UpdateCategory(UpdateCategoryDto updateCategoryDto)
         {
             // 1. Cüzdandaki anahtarı alalım
-            var token = Request.Cookies["ECommerceJwt"];
+            var token = Request.Cookies["ECommerceToken"];
             if (string.IsNullOrEmpty(token)) return RedirectToAction("Index", "Login");
 
             var client = _httpClientFactory.CreateClient();

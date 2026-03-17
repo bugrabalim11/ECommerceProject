@@ -16,7 +16,7 @@ namespace ECommerce.API.Controllers
         private readonly IOrderItemService _orderItemService;
         private readonly IMapper _mapper; // DTO dönüşümleri için
 
-        public OrderItemsController(IOrderItemService orderItemService,IMapper mapper)
+        public OrderItemsController(IOrderItemService orderItemService, IMapper mapper)
         {
             _orderItemService = orderItemService;
             _mapper = mapper;
@@ -55,7 +55,7 @@ namespace ECommerce.API.Controllers
         {
             // Önce var olup olmadığını servisten kontrol edebiliriz
             var existingItem = await _orderItemService.GetOrderItemByIdAsync(dto.Id);
-            if (existingItem != null)
+            if (existingItem == null)
             {
                 return NotFound("Güncellenecek Sipariş Kalemi Bulunamadı!");
             }
@@ -66,7 +66,19 @@ namespace ECommerce.API.Controllers
 
             await _orderItemService.UpdateOrderItemAsync(existingItem!);
             return Ok("Sipariş Kalemi Başarıyla Güncellendi!");
+        }
 
+        [HttpGet("GetItemsByOrderId/{orderId}")]
+        public async Task<IActionResult> GetItemsByOrderId(int orderId)
+        {
+            // 1. Aşçı zaten verileri vitrinlik (DTO) formatında hazırlayıp getiriyor.
+            var allItems = await _orderItemService.GetOrderItemsWithProductAsync();
+
+            // 2. Sadece bizim siparişe ait olanları filtreliyoruz.
+            var filteredItems = allItems.Where(x => x.OrderId == orderId).ToList();
+
+            // 3. SİHİRBAZA GEREK YOK! Veri zaten DTO formatında. Direkt masaya servis et!
+            return Ok(filteredItems);
         }
     }
 }

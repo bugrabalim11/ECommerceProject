@@ -1,4 +1,5 @@
-﻿using ECommerce.MVC.DTOs.OrderDtos; // Kendi DTO klasör yolunu buraya yazmayı unutma
+﻿using ECommerce.MVC.DTOs.OrderDtos;
+using ECommerce.MVC.DTOs.OrderItemDtos;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
 using System.Text.Json;
@@ -18,7 +19,7 @@ namespace ECommerce.MVC.Controllers
         public async Task<IActionResult> Index()
         {
             // 1. GÜVENLİK KONTROLÜ: Garsonun elinde geçerli bir yaka kartı (Token) var mı?
-            var token = Request.Cookies["ECommerceJwt"];
+            var token = Request.Cookies["ECommerceToken"];
             if (string.IsNullOrEmpty(token))
             {
                 // Kart yoksa kapı dışarı (Login sayfasına)
@@ -31,6 +32,13 @@ namespace ECommerce.MVC.Controllers
 
             // 3. API'DEN VERİYİ İSTE: Şeften tüm siparişlerin listesini istiyoruz
             var responseMessage = await client.GetAsync("https://localhost:7107/api/Orders");
+
+            // 🛡️ YENİ GÜVENLİK KONTROLÜ: Şef (API) "Bu kart geçersiz veya süresi dolmuş" derse (401):
+            if (responseMessage.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                Response.Cookies.Delete("ECommerceToken"); // Bozuk/Süresi dolmuş kartı çöpe at
+                return RedirectToAction("Index", "Login"); // Login'e postala!
+            }
 
             if (responseMessage.IsSuccessStatusCode)
             {
@@ -53,7 +61,7 @@ namespace ECommerce.MVC.Controllers
         [HttpGet]
         public async Task<IActionResult> DeleteOrder(int id)
         {
-            var token = Request.Cookies["ECommerceJwt"];
+            var token = Request.Cookies["ECommerceToken"];
             if (string.IsNullOrEmpty(token))
             {
                 return RedirectToAction("Index", "Login");
@@ -75,7 +83,7 @@ namespace ECommerce.MVC.Controllers
         [HttpGet]
         public async Task<IActionResult> UpdateOrder(int id)
         {
-            var token = Request.Cookies["ECommerceJwt"];
+            var token = Request.Cookies["ECommerceToken"];
             if (string.IsNullOrEmpty(token))
             {
                 return RedirectToAction("Index", "Login");
@@ -107,7 +115,7 @@ namespace ECommerce.MVC.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateOrder(UpdateOrderDto updateOrderDto)
         {
-            var token = Request.Cookies["ECommerceJwt"];
+            var token = Request.Cookies["ECommerceToken"];
             if (string.IsNullOrEmpty(token))
             {
                 return RedirectToAction("Index", "Login");
@@ -128,6 +136,46 @@ namespace ECommerce.MVC.Controllers
             }
 
             return View(updateOrderDto);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> OrderDetails(int id)
+        {
+            // 1. Cüzdandan yeni yaka kartımızı alıyoruz
+            var token = Request.Cookies["ECommerceToken"];
+
+            // 2. Kart yoksa doğruca Login kapısına
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
+            // 3. Garsonu mutfağa gönderiyoruz
+            var client = _httpClientFactory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var responseMessage = await client.GetAsync($"https://localhost:7107/api/OrderItems/GetItemsByOrderId/{id}");
+
+            // 4. Şef (API) "Bu kartın süresi dolmuş" derse:
+            if (responseMessage.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                Response.Cookies.Delete("ECommerceToken"); // Çürük kartı çöpe at
+                return RedirectToAction("Index", "Login"); // Login'e postala
+            }
+
+            // 5. Her şey başarılıysa, o 20 buzdolabını vitrine yolla!
+            if (responseMessage.IsSuccessStatusCode)
+            {
+                var jsonData = await responseMessage.Content.ReadAsStringAsync();
+                var values = JsonSerializer.Deserialize<List<ResultOrderItemDto>>(jsonData, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+                return View(values);
+            }
+
+            // 6. Başka bir hata olursa sayfa çökmesin, boş liste gitsin
+            return View(new List<ResultOrderItemDto>());
         }
 
     }

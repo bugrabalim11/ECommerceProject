@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Kategori Listesi";
     // Dünkü güvenlik şifremiz: Cüzdanda anahtar var mı?
-    bool isLoggedin = Context.Request.Cookies.ContainsKey("ECommerceJwt");
+    bool isLoggedin = Context.Request.Cookies.ContainsKey("ECommerceToken");
 }
 
 <div class="container mt-5">

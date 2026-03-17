@@ -49,7 +49,7 @@ namespace ECommerce.MVC.Controllers
         public async Task<IActionResult> CreateProduct()
         {
             // --- SENİN HARİKA TESPİTİN: GÜVENLİK DUVARI ---
-            var token = Request.Cookies["ECommerceJwt"];
+            var token = Request.Cookies["ECommerceToken"];
             if (string.IsNullOrEmpty(token)) return RedirectToAction("Index", "Login");
             // ----------------------------------------------
 
@@ -85,7 +85,7 @@ namespace ECommerce.MVC.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateProduct(CreateProductDto createProductDto)
         {
-            var token = Request.Cookies["ECommerceJwt"];
+            var token = Request.Cookies["ECommerceToken"];
             if (string.IsNullOrEmpty(token)) return RedirectToAction("Index", "Login");
 
             var client = _httpClientFactory.CreateClient();
@@ -111,7 +111,7 @@ namespace ECommerce.MVC.Controllers
         public async Task<IActionResult> DeleteProduct(int id)
         {
             // Cüzdandan anahtarı al
-            var token = Request.Cookies["ECommerceJwt"];
+            var token = Request.Cookies["ECommerceToken"];
             if (string.IsNullOrEmpty(token)) return RedirectToAction("Index", "Login");
 
             var client = _httpClientFactory.CreateClient();
@@ -136,7 +136,7 @@ namespace ECommerce.MVC.Controllers
         public async Task<IActionResult> UpdateProduct(int id)
         {
             // Güvenlik Duvarı
-            var token = Request.Cookies["ECommerceJwt"];
+            var token = Request.Cookies["ECommerceToken"];
             if (string.IsNullOrEmpty(token)) return RedirectToAction("Index", "Login");
 
             var client = _httpClientFactory.CreateClient();
@@ -179,7 +179,7 @@ namespace ECommerce.MVC.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateProduct(UpdateProductDto updateProductDto)
         {
-            var token = Request.Cookies["ECommerceJwt"];
+            var token = Request.Cookies["ECommerceToken"];
             if (string.IsNullOrEmpty(token)) return RedirectToAction("Index", "Login");
 
             var client = _httpClientFactory.CreateClient();
