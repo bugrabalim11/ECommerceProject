@@ -1,30 +1,43 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// 1. Standart Servisler
 builder.Services.AddControllersWithViews();
-builder.Services.AddHttpClient(); // API ile konuşacak garsonumuzu işe aldık!
+builder.Services.AddHttpClient(); // API ile konuşacak garsonumuz
+
+// 2. GÜVENLİK SERVİSİ: Çerez (Cookie) bazlı kimlik doğrulamayı sisteme tanıtıyoruz
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+    {
+        options.LoginPath = "/Login/Index/";        // Giriş yapmamışsa buraya yönlendir
+        options.AccessDeniedPath = "/Error/AccessDenied/"; // Yetkisi (Admin değilse) yoksa buraya yönlendir
+        options.Cookie.Name = "ECommerceCookie";    // Çerezin adı (Opsiyonel)
+    });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// HTTP İstek Hattı Yapılandırması (Sıralama Hayatidir!)
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
+
+// 3. Statik dosyalar (CSS, JS, Resimler) yetki kontrolüne takılmadan en başta yüklensin
+app.MapStaticAssets();
+
 app.UseRouting();
 
-app.UseAuthorization();
-
-app.MapStaticAssets();
+// 🚀 İŞTE O KRİTİK İKİLİ:
+app.UseAuthentication(); // ÖNCE: "Bu gelen kim? Elinde geçerli bir çerez var mı?"
+app.UseAuthorization();  // SONRA: "Tamam kim olduğunu anladım, peki bu sayfaya girmeye yetkin (Admin rolün) var mı?"
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
-
 
 app.Run();

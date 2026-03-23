@@ -22,6 +22,8 @@ namespace ECommerce.API.Controllers
             _mapper = mapper;
         }
 
+        // 🛑 KİLİTLİ: Tüm sipariş kalemlerini listelemek Admin'e özeldir.
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetOrderItemsList()
         {
@@ -33,6 +35,7 @@ namespace ECommerce.API.Controllers
             return Ok(mappedValues);
         }
 
+        // 🟢 AÇIK: Giriş yapmış her üye sepete/siparişe kalem ekleyebilir.
         [HttpPost]
         public async Task<IActionResult> CreateOrderItem(CreateOrderItemDto dto)
         {
@@ -43,6 +46,8 @@ namespace ECommerce.API.Controllers
             return Ok("Sipariş Kalemi Başarıyla Eklendi!");
         }
 
+        // 🛑 KİLİTLİ: Bir siparişin içeriğini silmek sadece Admin yetkisindedir.
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrderItem(int id)
         {
@@ -50,6 +55,9 @@ namespace ECommerce.API.Controllers
             return Ok("Sipariş Kalemi Başarıyla Silindi!");
         }
 
+
+        // 🛑 KİLİTLİ: Sipariş kalemini güncellemek (adet, fiyat vs.) Admin işidir.
+        [Authorize(Roles = "Admin")]
         [HttpPut]
         public async Task<IActionResult> UpdateOrderItem(UpdateOrderItemDto dto)
         {
@@ -68,6 +76,9 @@ namespace ECommerce.API.Controllers
             return Ok("Sipariş Kalemi Başarıyla Güncellendi!");
         }
 
+
+        // 🛑 KİLİTLİ: Belirli bir siparişin içeriğini ID ile sorgulamak Admin'e özeldir.
+        [Authorize(Roles = "Admin")]
         [HttpGet("GetItemsByOrderId/{orderId}")]
         public async Task<IActionResult> GetItemsByOrderId(int orderId)
         {

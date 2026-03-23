@@ -2,9 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ECommerce.MVC.Controllers
 {
+    [Authorize] // 🔒 Giriş yapmayan sipariş detaylarını kurcalayamaz.
     public class OrderItemsController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
@@ -14,11 +16,12 @@ namespace ECommerce.MVC.Controllers
             _httpClientFactory = httpClientFactory;
         }
 
+        // 🟢 HERKES (Giriş Yapan): Kendi siparişinin detayını görebilir.
         [HttpGet]
         public async Task<IActionResult> OrderDetails(int id) // Buradaki id, OrderId'dir
         {
             var token = Request.Cookies["ECommerceToken"];
-            if (string.IsNullOrEmpty(token)) return RedirectToAction("Index", "Login");
+            // [Authorize] sayesinde artık manuel null kontrolüne gerek yok!
 
             var client = _httpClientFactory.CreateClient();
 
@@ -41,7 +44,8 @@ namespace ECommerce.MVC.Controllers
             return View(new List<ResultOrderItemDto>());
         }
 
-
+        // ama Admin tüm kalemleri listelesin istersen burayı da Admin'e kilitleyebilirsin.
+        [Authorize(Roles = "Admin")]
         public IActionResult Index()
         {
             return View();

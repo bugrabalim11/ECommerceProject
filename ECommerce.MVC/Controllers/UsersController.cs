@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization; // 👈 1. Kütüphaneyi ekledik
 
 namespace ECommerce.MVC.Controllers
 {
+    [Authorize(Roles = "Admin")] // 👈 2. TÜM SINIFI MÜHÜRLEDİK! (Sadece Admin girebilir)
     public class UsersController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
@@ -16,12 +18,9 @@ namespace ECommerce.MVC.Controllers
         }
 
         // 1. Kullanıcı Listesi
-        [HttpGet]
         public async Task<IActionResult> Index()
         {
             var token = Request.Cookies["ECommerceToken"];
-            if (string.IsNullOrEmpty(token)) return RedirectToAction("Index", "Login");
-
             var client = _httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -39,17 +38,14 @@ namespace ECommerce.MVC.Controllers
             return View(new List<ResultUserDto>());
         }
 
-        // 2. Güncelleme Sayfası (Verileri Getiren Kısım)
+        // 2. Güncelleme Sayfası
         [HttpGet]
         public async Task<IActionResult> UpdateUser(int id)
         {
             var token = Request.Cookies["ECommerceToken"];
-            if (string.IsNullOrEmpty(token)) return RedirectToAction("Index", "Login");
-
             var client = _httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            // API'den ID'ye göre tek bir kullanıcıyı çekiyoruz
             var responseMessage = await client.GetAsync($"https://localhost:7107/api/Users/{id}");
 
             if (responseMessage.IsSuccessStatusCode)
@@ -61,43 +57,29 @@ namespace ECommerce.MVC.Controllers
                 });
                 return View(values);
             }
-
-            // Eğer hala hata alırsan ne olduğunu görmek için:
-            return Content($"API Hatası! Durum Kodu: {responseMessage.StatusCode}, Gidilen ID: {id}");
+            return RedirectToAction("Index");
         }
 
-        // 3. Güncelleme İşlemi (Formu Gönderen Kısım)
+        // 3. Güncelleme İşlemi
         [HttpPost]
         public async Task<IActionResult> UpdateUser(UpdateUserDto updateUserDto)
         {
             var token = Request.Cookies["ECommerceToken"];
-            if (string.IsNullOrEmpty(token)) return RedirectToAction("Index", "Login");
-
             var client = _httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var jsonData = JsonSerializer.Serialize(updateUserDto);
             var stringContent = new StringContent(jsonData, Encoding.UTF8, "application/json");
 
-            // API'ye PUT isteği atıyoruz
             var responseMessage = await client.PutAsync($"https://localhost:7107/api/Users/{updateUserDto.UserId}", stringContent);
 
-            if (responseMessage.IsSuccessStatusCode)
-            {
-                return RedirectToAction("Index");
-            }
-
-            ViewBag.Error = "Güncelleme sırasında bir hata oluştu.";
-            return View(updateUserDto);
+            return responseMessage.IsSuccessStatusCode ? RedirectToAction("Index") : View(updateUserDto);
         }
 
         // 4. Kullanıcı Silme
-        [HttpGet]
         public async Task<IActionResult> DeleteUser(int id)
         {
             var token = Request.Cookies["ECommerceToken"];
-            if (string.IsNullOrEmpty(token)) return RedirectToAction("Index", "Login");
-
             var client = _httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 

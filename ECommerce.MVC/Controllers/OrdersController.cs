@@ -3,9 +3,11 @@ using ECommerce.MVC.DTOs.OrderItemDtos;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ECommerce.MVC.Controllers
 {
+    [Authorize] // 🔒 2. Giriş yapmayan bu kapıdan içeri bakamaz bile!
     public class OrdersController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
@@ -15,16 +17,14 @@ namespace ECommerce.MVC.Controllers
             _httpClientFactory = httpClientFactory;
         }
 
+        // 🛑 SADECE ADMİN: Tüm dükkanın sipariş listesini görmek patronun işidir.
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> Index()
         {
             // 1. GÜVENLİK KONTROLÜ: Garsonun elinde geçerli bir yaka kartı (Token) var mı?
             var token = Request.Cookies["ECommerceToken"];
-            if (string.IsNullOrEmpty(token))
-            {
-                // Kart yoksa kapı dışarı (Login sayfasına)
-                return RedirectToAction("Index", "Login");
-            }
+            
 
             // 2. HTTP İSTEMCİSİ OLUŞTUR: Garsonu mutfağa (API) yollamak için hazırlıyoruz
             var client = _httpClientFactory.CreateClient();
@@ -58,6 +58,8 @@ namespace ECommerce.MVC.Controllers
             return View(new List<ResultOrderDto>());
         }
 
+        // 🛑 SADECE ADMİN: Sipariş iptali/silme
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> DeleteOrder(int id)
         {
@@ -72,22 +74,18 @@ namespace ECommerce.MVC.Controllers
 
             var responseMessage = await client.DeleteAsync($"https://localhost:7107/api/Orders/{id}");
 
-            if (responseMessage.IsSuccessStatusCode)
-            {
-                return RedirectToAction("Index");
-            }
+            
 
             return RedirectToAction("Index");
         }
 
+        // 🛑 SADECE ADMİN: Sipariş durumunu güncelleme (Kargoya verildi vs.)
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> UpdateOrder(int id)
         {
             var token = Request.Cookies["ECommerceToken"];
-            if (string.IsNullOrEmpty(token))
-            {
-                return RedirectToAction("Index", "Login");
-            }
+            
 
             var client = _httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -112,14 +110,12 @@ namespace ECommerce.MVC.Controllers
             return RedirectToAction("Index");
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> UpdateOrder(UpdateOrderDto updateOrderDto)
         {
             var token = Request.Cookies["ECommerceToken"];
-            if (string.IsNullOrEmpty(token))
-            {
-                return RedirectToAction("Index", "Login");
-            }
+            
 
             var client = _httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -138,17 +134,15 @@ namespace ECommerce.MVC.Controllers
             return View(updateOrderDto);
         }
 
+        // 🟢 HERKES (Giriş Yapan): Kendi siparişinin detayına bakabilir 
+        // (Şimdilik Admin'e kilitli kalabilir veya her üyeye açılabilir)
         [HttpGet]
         public async Task<IActionResult> OrderDetails(int id)
         {
             // 1. Cüzdandan yeni yaka kartımızı alıyoruz
             var token = Request.Cookies["ECommerceToken"];
 
-            // 2. Kart yoksa doğruca Login kapısına
-            if (string.IsNullOrEmpty(token))
-            {
-                return RedirectToAction("Index", "Login");
-            }
+            
 
             // 3. Garsonu mutfağa gönderiyoruz
             var client = _httpClientFactory.CreateClient();

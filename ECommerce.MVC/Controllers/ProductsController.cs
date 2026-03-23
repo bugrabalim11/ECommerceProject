@@ -5,6 +5,7 @@ using System.Text;
 using System.Net.Http.Headers;
 using ECommerce.MVC.DTOs.CategoryDtos;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ECommerce.MVC.Controllers
 {
@@ -45,6 +46,7 @@ namespace ECommerce.MVC.Controllers
         }
 
         // 3. Ürün Ekleme Formunu Ekrana Getiren Metot
+        [Authorize(Roles = "Admin")] // 🛑 Sadece Admin form sayfasını görebilir!
         [HttpGet]
         public async Task<IActionResult> CreateProduct()
         {
@@ -82,6 +84,7 @@ namespace ECommerce.MVC.Controllers
         }
 
         // 4. Form Doldurulup "Kaydet"e Basıldığında Çalışacak Metot
+        [Authorize(Roles = "Admin")] // 🛑 Sadece Admin ekleme yapabilir!
         [HttpPost]
         public async Task<IActionResult> CreateProduct(CreateProductDto createProductDto)
         {
@@ -107,6 +110,7 @@ namespace ECommerce.MVC.Controllers
         }
 
         // 5. Ürünü Silmek İçin Çalışacak Metot
+        [Authorize(Roles = "Admin")] // 🛑 Sadece Admin silebilir!
         [HttpGet]
         public async Task<IActionResult> DeleteProduct(int id)
         {
@@ -132,6 +136,7 @@ namespace ECommerce.MVC.Controllers
         }
 
         // 6. Güncelleme Formunu (Kutular Dolu Halde) Getiren Metot
+        [Authorize(Roles = "Admin")] // 🛑 Sadece Admin güncelleme sayfasını görebilir!
         [HttpGet]
         public async Task<IActionResult> UpdateProduct(int id)
         {
@@ -176,6 +181,7 @@ namespace ECommerce.MVC.Controllers
         }
 
         // 7. Güncelleme Formu Onaylandığında Çalışacak Metot
+        [Authorize(Roles = "Admin")] // 🛑 Sadece Admin güncelleyebilir!
         [HttpPost]
         public async Task<IActionResult> UpdateProduct(UpdateProductDto updateProductDto)
         {

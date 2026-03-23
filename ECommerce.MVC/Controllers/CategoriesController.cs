@@ -3,6 +3,7 @@ using System.Text.Json;
 using ECommerce.MVC.DTOs.CategoryDtos;
 using System.Text;
 using System.Net.Http.Headers;
+using Microsoft.AspNetCore.Authorization; // 👈 Mutlaka ekle!
 
 namespace ECommerce.MVC.Controllers
 {
@@ -14,6 +15,8 @@ namespace ECommerce.MVC.Controllers
         {
             _httpClientFactory = httpClientFactory;
         }
+
+        // 🟢 Herkes görebilir
         public async Task<IActionResult> Index()
         {
             var client = _httpClientFactory.CreateClient();
@@ -30,6 +33,8 @@ namespace ECommerce.MVC.Controllers
             return View();
         }
 
+        // 🛑 SADECE ADMİN: Kategori Ekleme Sayfası
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult CreateCategory()
         {
@@ -37,13 +42,14 @@ namespace ECommerce.MVC.Controllers
             return View();
         }
 
+        // 🛑 SADECE ADMİN: Kategori Kaydetme
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateCategory(CreateCategoryDto createCategoryDto)
         {
             // 1. Cüzdana bak, anahtar yoksa Login kapısına yolla!
             var token = Request.Cookies["ECommerceToken"];
-            if (string.IsNullOrEmpty(token)) return RedirectToAction("Index", "Login");
-
+            // Artık token kontrolünü [Authorize] yapıyor, direkt işe girişebiliriz
             var client = _httpClientFactory.CreateClient();
 
             // 2. Anahtarı Garsonun eline ver
@@ -55,38 +61,23 @@ namespace ECommerce.MVC.Controllers
 
             var responseMessage = await client.PostAsync("https://localhost:7107/api/Categories", stringContent);
 
-            if (responseMessage.IsSuccessStatusCode)
-            {
-                return RedirectToAction("Index");
-            }
-
-            return View();
+            return responseMessage.IsSuccessStatusCode ? RedirectToAction("Index") : View();
         }
 
+        // 🛑 SADECE ADMİN: Kategori Silme
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> DeleteCategory(int id)
         {
-            // 1. Cüzdandaki anahtarı alalım
             var token = Request.Cookies["ECommerceToken"];
-
-            // 2. Anahtar yoksa veya süresi bittiyse direkt Login kapısına yolla
-            if (string.IsNullOrEmpty(token))
-            {
-                return RedirectToAction("Index", "Login");
-            }
-
             var client = _httpClientFactory.CreateClient();
-
-            // 3. Anahtarı Garsonun yakasına tak
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-            // 4. API'ye silme isteğini atalım
-            var responseMessage = await client.DeleteAsync($"https://localhost:7107/api/Categories/{id}");
-
-            // 5. İşlem başarılıysa veya başarısızsa listeye dön (Başarısızsa ileride hata mesajı ekleriz)
+            await client.DeleteAsync($"https://localhost:7107/api/Categories/{id}");
             return RedirectToAction("Index");
         }
 
+        // 🛑 SADECE ADMİN: Güncelleme Formu
+        [Authorize(Roles = "Admin")]
         [HttpGet]  // Tablodaki kategorşleri listeledik
         public async Task<IActionResult> UpdateCategory(int id)
         {
@@ -110,12 +101,14 @@ namespace ECommerce.MVC.Controllers
             return RedirectToAction("Index");
         }
 
+        // 🛑 SADECE ADMİN: Güncelleme Kaydı
+        [Authorize(Roles = "Admin")]
         [HttpPost]  // ID ile seçip güncelledik
         public async Task<IActionResult> UpdateCategory(UpdateCategoryDto updateCategoryDto)
         {
             // 1. Cüzdandaki anahtarı alalım
             var token = Request.Cookies["ECommerceToken"];
-            if (string.IsNullOrEmpty(token)) return RedirectToAction("Index", "Login");
+           
 
             var client = _httpClientFactory.CreateClient();
 

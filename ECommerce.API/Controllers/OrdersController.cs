@@ -9,7 +9,7 @@ namespace ECommerce.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize]   // 🔐 Giriş şart!
     public class OrdersController : ControllerBase
     {
         private readonly IOrderService _orderService;
@@ -25,6 +25,8 @@ namespace ECommerce.API.Controllers
 
 
         // YENİ VE HAVALI METODUMUZ!
+        // 🛑 KİLİTLİ: Dükkandaki TÜM siparişleri (detaylı) sadece Admin görebilir.
+        [Authorize(Roles = "Admin")]
         [HttpGet("GetOrderWithDetails")]
         public async Task<IActionResult> GetOrdersWithDetails()
         {
@@ -38,6 +40,9 @@ namespace ECommerce.API.Controllers
             return Ok(mappedValues);
         }
 
+
+        // 🛑 KİLİTLİ: Tüm sipariş listesini çekmek Admin'e özeldir.
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAllOrders()
         {
@@ -45,6 +50,9 @@ namespace ECommerce.API.Controllers
             return Ok(_mapper.Map<List<ResultOrderDto>>(values));
         }
 
+
+        // 🛑 KİLİTLİ: Bir siparişin detayına ID ile bakmak şimdilik sadece Admin işidir.
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOrder(int id)
         {
@@ -55,9 +63,10 @@ namespace ECommerce.API.Controllers
             var mappedValue = _mapper.Map<UpdateOrderDto>(value);
 
             return Ok(mappedValue);
-        } 
+        }
 
 
+        // 🟢 AÇIK: Herkes (Giriş yapan) sipariş oluşturabilir.
         [HttpPost]
         public async Task<IActionResult> CreateOrder(CreateOrderDto dto)
         {
@@ -73,6 +82,9 @@ namespace ECommerce.API.Controllers
             return Ok("Sipariş Başarıyla Oluşturuldu!");
         }
 
+
+        // 🛑 KİLİTLİ: Sipariş silme yetkisi sadece Admin'dedir.
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrder(int id)
         {
@@ -80,6 +92,9 @@ namespace ECommerce.API.Controllers
             return Ok("Sipariş Başarıyla Silindi!");
         }
 
+
+        // 🛑 KİLİTLİ: Sipariş durumunu güncelleme (Kargoya verildi vs.) Admin işidir.
+        [Authorize(Roles = "Admin")]
         [HttpPut]
         public async Task<IActionResult> UpdateOrder(UpdateOrderDto dto)
         {

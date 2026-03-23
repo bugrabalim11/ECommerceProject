@@ -3,8 +3,9 @@
 @{
     ViewData["Title"] = "Ürünlerimiz";
 
-    // Cüzdanda JWT Token var mı diye bakıyoruz
-    bool isLoggedin = Context.Request.Cookies.ContainsKey("ECommerceToken");
+    // 🔐 GÜVENLİK KONTROLLERİ (Sarı uyarıyı silen versiyon)
+    bool isLoggedin = User.Identity?.IsAuthenticated ?? false;
+    bool isAdmin = User.IsInRole("Admin");
 }
 
 <div class="container mt-2">
@@ -14,7 +15,8 @@
         <div class="d-flex align-items-center gap-3">
             <span class="badge bg-dark px-3 py-2">Toplam @(Model?.Count ?? 0) Ürün</span>
 
-            @if (isLoggedin)
+            @* 🛑 SADECE ADMİN YENİ ÜRÜN EKLEME BUTONUNU GÖRÜR *@
+            @if (isAdmin)
             {
                 <a asp-controller="Products" asp-action="CreateProduct" class="btn btn-success fw-bold shadow-sm">
                     <i class="fa-solid fa-plus me-1"></i> Yeni Ürün Ekle
@@ -30,6 +32,8 @@
             {
                 <div class="col">
                     <div class="card h-100 shadow-sm border-0">
+                        @* ... Resim Kontrol Kodların Aynı Kalıyor ... *@
+
                         @if (!string.IsNullOrEmpty(item.ImageUrl))
                         {
                             // İŞTE YENİ AKILLI RESİM KONTROLÜMÜZ:
@@ -56,7 +60,8 @@
                             <div class="mt-auto">
                                 <h4 class="text-primary fw-bold mb-3">@item.ProductPrice.ToString("C2")</h4>
 
-                                @if (isLoggedin)
+                                @* 🛑 SADECE ADMİN GÜNCELLE VE SİL BUTONLARINI GÖRÜR *@
+                                @if (isAdmin)
                                 {
                                     <div class="d-flex gap-2 mb-2">
                                         <a asp-controller="Products" asp-action="UpdateProduct" asp-route-id="@item.ProductId" class="btn btn-sm btn-warning w-50 fw-bold text-dark">
@@ -69,6 +74,7 @@
                                     </div>
                                 }
 
+                                @* 🟢 SEPETE EKLE BUTONUNU HERKES GÖRÜR *@
                                 <a href="#" class="btn btn-outline-primary w-100 rounded-pill">
                                     <i class="fa-solid fa-cart-plus me-1"></i>Sepete Ekle
                                 </a>
