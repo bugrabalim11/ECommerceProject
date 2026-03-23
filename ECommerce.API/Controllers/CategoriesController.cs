@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerce.API.Controllers
 {
-    [Authorize] // Dün astığımız kapı kilidimiz :)
     [Route("api/[controller]")]
     [ApiController]
     public class CategoriesController : ControllerBase
@@ -22,7 +21,6 @@ namespace ECommerce.API.Controllers
             _mapper = mapper;  // İçeri aldık
         }
 
-        [AllowAnonymous] // Vitrinimiz herkese açık
         [HttpGet]
         public async Task<IActionResult> GetAllCategories()
         {
@@ -31,7 +29,6 @@ namespace ECommerce.API.Controllers
             return Ok(mappedValues);
         }
 
-        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCategoryById(int id)
         {
@@ -41,6 +38,7 @@ namespace ECommerce.API.Controllers
             return Ok(category);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateCategory(CreateCategoryDto dto)
         {
@@ -52,6 +50,7 @@ namespace ECommerce.API.Controllers
             return Ok("Kategori başarıyla eklendi.");
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut]
         public async Task<IActionResult> UpdateCategory(UpdateCategoryDto dto)
         {
@@ -66,6 +65,7 @@ namespace ECommerce.API.Controllers
             return Ok("Kategori başarıyla güncellendi!");
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategory(int id)
         {

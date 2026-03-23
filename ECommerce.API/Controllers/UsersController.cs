@@ -9,7 +9,7 @@ namespace ECommerce.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class UsersController : ControllerBase
     {
         // Artık veritabanıyla değil, Aşçımızla (Service) konuşuyoruz!

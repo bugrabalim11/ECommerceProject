@@ -10,6 +10,10 @@
         public DateTime CreatedAt { get; set; }
 
 
+        // 👑 YENİ EKLENEN SÜTUN: Kullanıcının Rolü
+        public string Role { get; set; } = "User";
+
+
 
         // İlişki (Bire-Çok): Bir kullanıcının birden fazla siparişi olabilir
         public ICollection<Order> Orders { get; set; } = null!;

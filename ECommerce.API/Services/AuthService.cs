@@ -51,7 +51,10 @@ namespace ECommerce.API.Services
             {
                 new Claim(JwtRegisteredClaimNames.Email, user.UserEmail),
                 new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()), // Token'a özel benzersiz ID
-                new Claim("UserId", user.UserId.ToString()) // İleride sepete ürün eklerken bu ID çok lazım olacak!
+                new Claim("UserId", user.UserId.ToString()), // İleride sepete ürün eklerken bu ID çok lazım olacak!
+
+                // 👑 GÜNCELLENEN SATIR: Eğer user.Role boş (null) gelirse, otomatik "User" kabul et!
+                new Claim(ClaimTypes.Role, user.Role ?? "User")
             };
 
 

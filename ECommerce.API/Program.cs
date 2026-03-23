@@ -47,7 +47,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 
 
 // Sisteme "Gidip MappingProfile sınıfının olduğu yeri bul ve çalıştır" diyoruz.
-builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
+builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
 // --- 3. DEPENDENCY INJECTION (İŞÇİ KAYITLARI) ---
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
