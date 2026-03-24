@@ -10,7 +10,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold text-dark"><i class="fa-solid fa-tags me-2"></i>Kategoriler</h2>
 
-        @if (isLoggedin)
+        @if (User.IsInRole("Admin"))
         {
             <a asp-controller="Categories" asp-action="CreateCategory" class="btn btn-success fw-bold shadow-sm">
                 <i class="fa-solid fa-plus me-1"></i> Yeni Kategori Ekle
@@ -28,7 +28,7 @@
                             <th class="ps-3">#</th>
                             <th>Kategori Adı</th>
                             <th>Açıklama</th>
-                            @if (isLoggedin)
+                            @if (User.IsInRole("Admin"))
                             {
                                 <th class="text-end pe-4">İşlemler</th>
                             }
@@ -42,7 +42,7 @@
                                 <td class="align-middle fw-bold text-primary">@item.CategoryName</td>
                                 <td class="align-middle text-muted">@item.CategoryDescription</td>
 
-                                @if (isLoggedin)
+                                @if (User.IsInRole("Admin"))
                                 {
                                     <td class="text-end align-middle pe-3">
                                         <a asp-controller="Categories" asp-action="UpdateCategory" asp-route-id="@item.CategoryId" class="btn btn-sm btn-warning fw-bold text-dark me-1">

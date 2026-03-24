@@ -82,5 +82,38 @@ namespace ECommerce.MVC.Controllers
             // 3. Kullanıcıyı ana sayfaya veya Login ekranına gönder
             return RedirectToAction("Index", "Login");
         }
+
+        // --- KAYIT OLMA (REGISTER) İŞLEMLERİ ---
+        [HttpGet]
+        public IActionResult Register()
+        {
+            // Sadece boş formu ekrana getirir
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Register(RegisterDto registerDto)
+        {
+            // 1. API ile haberleşecek istemciyi (Garsonu) oluşturuyoruz
+            var client = _httpClientFactory.CreateClient();
+
+            // 2. Formdan gelen veriyi (Çantayı) internette taşınabilmesi için JSON formatına çeviriyoruz
+            var jsonData = JsonSerializer.Serialize(registerDto);
+            StringContent stringContent = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+            // 3. API'nin kapısını çalıyoruz (Senin API portun 7107 idi, eğer değiştiyse burayı güncellemeyi unutma!)
+            var responseMessage = await client.PostAsync("https://localhost:7107/api/Auth/Register", stringContent);
+
+            // 4. Eğer mutfaktan "Kayıt Başarılı" (200 OK) cevabı gelirse:
+            if (responseMessage.IsSuccessStatusCode)
+            {
+                // Müşteriyi giriş yapması için Login (Index) sayfasına yönlendiriyoruz
+                return RedirectToAction("Index", "Login");
+            }
+
+            // 5. Eğer hata olursa (Örn: E-posta zaten varsa) aynı sayfayı hata mesajıyla tekrar göster
+            ModelState.AddModelError("", "Kayıt işlemi başarısız oldu. Bu e-posta adresi sistemde zaten kayıtlı olabilir.");
+            return View(registerDto);
+        }
     }
 }

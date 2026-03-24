@@ -6,7 +6,8 @@
         public decimal UnitPrice { get; set; }
 
         // JSON'daki o "product" kutusunu yakalamak için ekliyoruz:
-        public OrderItemProductDto Product { get; set; }
+        // "Bu kutu JSON gelene kadar boş kalabilir, panik yapma" dedik (?)
+        public OrderItemProductDto? Product { get; set; }
     }
 
     // O küçük kutunun içindeki "productName" bilgisini alacak sınıfımız:

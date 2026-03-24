@@ -17,8 +17,8 @@ namespace ECommerce.MVC.Controllers
             _httpClientFactory = httpClientFactory;
         }
 
-        // 🛑 SADECE ADMİN: Tüm dükkanın sipariş listesini görmek patronun işidir.
-        [Authorize(Roles = "Admin")]
+        // 🛑 SADECE ADMİN YAZAN KİLİDİ SİLDİK: Artık giriş yapan herkes siparişlerim sayfasına girebilir.
+        // [Authorize(Roles = "Admin")] -> BUNU TAMAMEN SİL
         [HttpGet]
         public async Task<IActionResult> Index()
         {

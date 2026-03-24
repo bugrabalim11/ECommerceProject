@@ -2,6 +2,7 @@
 using ECommerce.API.Interfaces;
 using ECommerce.API.DTOs.LoginDtos; // DTO klasörünün adını LoginDtos yapmıştın
 
+
 namespace ECommerce.API.Controllers
 {
     [Route("api/[controller]")]
@@ -30,6 +31,19 @@ namespace ECommerce.API.Controllers
 
             // 3. Her şey doğruysa, üretilen Token'ı (VIP Bilekliği) müşteriye ver
             return Ok(new { Token = token, Message = "Giriş Başarılı!" });
+        }
+
+        [HttpPost("Register")]
+        public async Task<IActionResult>Register([FromBody] RegisterDto registerDto)
+        {
+            // Güvenlik Şefine (AuthService) "Bu yeni müşteriyi kaydet" diyeceğiz.
+            var result = await _authService.RegisterAsync(registerDto);
+
+            if (result)
+            {
+                return Ok("Kayıt işlemi başarıyla tamamlandı!");
+            }
+            return BadRequest("Kayıt başarısız! Bu e-posta adresi zaten kullanılıyor olabilir.");
         }
     }
 }

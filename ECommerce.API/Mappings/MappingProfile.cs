@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using ECommerce.API.DTOs.CategoryDtos;
+using ECommerce.API.DTOs.LoginDtos;
 using ECommerce.API.DTOs.OrderDtos;
 using ECommerce.API.DTOs.OrderItemDtos;
 using ECommerce.API.DTOs.ProductDtos;
@@ -70,6 +71,9 @@ namespace ECommerce.API.Mappings
 
             CreateMap<Order, CreateOrderDto>().ReverseMap();
             CreateMap<Order, UpdateOrderDto>().ReverseMap();
+
+            // --- KAYIT (REGİSTER) HARİTALARI ---
+            CreateMap<RegisterDto, User>();
         }
     }
 }

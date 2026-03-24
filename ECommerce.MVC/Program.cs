@@ -11,7 +11,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
     {
         options.LoginPath = "/Login/Index/";        // Giriş yapmamışsa buraya yönlendir
-        options.AccessDeniedPath = "/Error/AccessDenied/"; // Yetkisi (Admin değilse) yoksa buraya yönlendir
+        options.AccessDeniedPath = "/Login/AccessDenied/"; // 👑 Garson yetkisi olmayanları BİZİM tasarladığımız sayfaya atsın
         options.Cookie.Name = "ECommerceCookie";    // Çerezin adı (Opsiyonel)
     });
 

@@ -7,5 +7,9 @@ namespace ECommerce.API.Interfaces
     {
         // Geriye o uzun şifreli metni (Token) döneceği için Task<string> yazıyoruz.
         Task<string?> LoginAsync(LoginDto loginDto);
+
+
+        // 👑 YENİ EKLENEN: Kayıt olma kuralı (Başarılıysa true, hata varsa false dönecek)
+        Task<bool> RegisterAsync(RegisterDto registerDto);
     }
 }

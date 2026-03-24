@@ -1,9 +1,11 @@
-﻿using ECommerce.API.Interfaces;
+﻿using AutoMapper;
+using ECommerce.API.Interfaces;
 using ECommerce.API.DTOs.LoginDtos;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using ECommerce.API.Entities; // User sınıfı için
 
 namespace ECommerce.API.Services
 {
@@ -13,15 +15,17 @@ namespace ECommerce.API.Services
         // 1. İçerideki Kullanıcı Aşçısına (Veritabanında bu adam var mı diye sormak için)
         private readonly IUserService _userService;
 
-
         // 2. Ayar dosyasına (appsettings.json içindeki gizli şifreleri okumak için)
         private readonly IConfiguration _configuration;
 
+        private readonly IMapper _mapper;  // 👈 1. Mapper'ı tanımladık
 
-        public AuthService(IUserService userService, IConfiguration configuration)
+
+        public AuthService(IUserService userService, IConfiguration configuration, IMapper mapper)
         {
             _userService = userService;
             _configuration = configuration;
+            _mapper = mapper;
         }
 
 
@@ -70,6 +74,33 @@ namespace ECommerce.API.Services
 
             // d) Oluşan bilekliği yazı (string) formatına çevirip teslim ediyoruz
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+
+        public async Task<bool> RegisterAsync(RegisterDto registerDto)
+        {
+            // ADIM 1: Bu mail adresiyle daha önce kayıt olunmuş mu kontrol et!
+            var existingUser = await _userService.GetUserByEmailAsync(registerDto.UserEmail);
+
+            if (existingUser != null)
+            {
+                return false; // E-posta zaten var, aynı maille iki kere kayıt olunmaz!
+            }
+
+            // 🛑 MANUEL EŞLEŞTİRME YERİNE AUTOMAPPER KULLANIYORUZ:
+            // "Çantadaki (DTO) verileri al, doğrudan User nesnesine dönüştür"
+            var newUser = _mapper.Map<User>(registerDto);
+
+            // DTO'da olmayan ama veritabanının istediği zorunlu alanları elle ekliyoruz:
+            newUser.CreatedAt = DateTime.Now;
+            newUser.Role = "User";
+
+            // Aşçıya gönderiyoruz
+            await _userService.AddUserAsync(newUser);
+
+            // 🛑 İŞTE CS0161 HATASINI ÇÖZEN SATIR BURASI:
+            // Kod buraya kadar hatasız geldiyse, "Kayıt Başarılı (true)" diyerek işlemi bitirmeliyiz!
+            return true;
         }
     }
 }
