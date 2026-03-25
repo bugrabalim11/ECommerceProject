@@ -115,5 +115,12 @@ namespace ECommerce.MVC.Controllers
             ModelState.AddModelError("", "Kayıt işlemi başarısız oldu. Bu e-posta adresi sistemde zaten kayıtlı olabilir.");
             return View(registerDto);
         }
+
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            // Sadece hata sayfasını gösterecek, başka hiçbir işlemi yok.
+            return View();
+        }
     }
 }

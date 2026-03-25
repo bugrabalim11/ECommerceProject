@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using ECommerce.API.DTOs.BasketDtos;
 using ECommerce.API.DTOs.CategoryDtos;
 using ECommerce.API.DTOs.LoginDtos;
 using ECommerce.API.DTOs.OrderDtos;
@@ -74,6 +75,17 @@ namespace ECommerce.API.Mappings
 
             // --- KAYIT (REGİSTER) HARİTALARI ---
             CreateMap<RegisterDto, User>();
+
+            // --- Sepet (Basket) HARİTALARI ---
+            CreateMap<Basket, CreateBasketDto>().ReverseMap();
+            CreateMap<Basket, UpdateBasketDto>().ReverseMap();
+            // Önce düz eşlemeyi yap ve ProductName'i nereden alacağını söyle
+            CreateMap<Basket, ResultBasketDto>()
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.ProductName));
+
+            // Sonra tersini (DTO'dan Entity'ye) ayrı bir satırda yapabiliriz (Daha garantidir)
+            CreateMap<ResultBasketDto, Basket>();
+
         }
     }
 }
