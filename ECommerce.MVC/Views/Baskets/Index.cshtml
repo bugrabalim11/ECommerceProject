@@ -1,0 +1,83 @@
+﻿@model List<ECommerce.MVC.DTOs.BasketDtos.ResultBasketDto>
+
+@{
+    ViewData["Title"] = "Sepetim";
+    Layout = "~/Views/Shared/_Layout.cshtml"; 
+    
+    decimal grandTotal = 0;
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4">🛒 Alışveriş Sepetim</h2>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-warning text-center">
+            <h5>Sepetinizde henüz ürün bulunmamaktadır. 😔</h5>
+            <a href="/Products/Index" class="btn btn-primary mt-3">Alışverişe Başla</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover text-center align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Ürün Adı</th>
+                        <th>Birim Fiyat</th>
+                        <th>Adet</th>
+                        <th>Toplam Fiyat</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        // O satırdaki ürünün toplam fiyatını hesaplıyoruz (Fiyat * Adet)
+                        var rowTotal = item.ProductPrice * item.StockQuantity;
+                        
+                        // Kasanın genel toplamına bu satırı ekliyoruz
+                        grandTotal += rowTotal;
+
+                        <tr>
+                            <td class="fw-bold">@item.ProductName</td>
+                            <td>@item.ProductPrice ₺</td>
+                            <td>
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <a href="/Baskets/UpdateQuantity?id=@item.BasketId&newQuantity=@(item.StockQuantity - 1)"
+                                       class="btn btn-outline-danger btn-sm fw-bold">-</a>
+
+                                    <span class="mx-3 fw-bold">@item.StockQuantity</span>
+
+                                    <a href="/Baskets/UpdateQuantity?id=@item.BasketId&newQuantity=@(item.StockQuantity + 1)"
+                                       class="btn btn-outline-success btn-sm fw-bold">+</a>
+                                </div>
+                            </td>
+                            <td class="text-success fw-bold">@rowTotal ₺</td>
+                            <td>
+                                <a href="/Baskets/DeleteBasket/@item.BasketId" class="btn btn-danger btn-sm">
+                                    🗑️ Sepetten Çıkar
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="row justify-content-end mt-4">
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title border-bottom pb-2">Sipariş Özeti</h5>
+                        <p class="card-text d-flex justify-content-between mt-3">
+                            <span class="fs-5">Genel Toplam:</span>
+                            <span class="fs-5 text-success fw-bold">@grandTotal ₺</span>
+                        </p>
+                        <a href="#" class="btn btn-success w-100 btn-lg mt-2">Ödemeye Geç 💳</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

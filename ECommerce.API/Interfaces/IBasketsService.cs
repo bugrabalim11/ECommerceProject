@@ -3,7 +3,7 @@ using ECommerce.API.Entities;
 
 namespace ECommerce.API.Interfaces
 {
-    public interface IBasketService
+    public interface IBasketsService
     {
         // YENİ GÖREV: Müşterinin ID'sine göre sepeti getir
         Task<List<Basket>> GetBasketByUserIdAsync(int userId);
@@ -12,5 +12,6 @@ namespace ECommerce.API.Interfaces
         Task AddBasketAsync(Basket basket);
         Task DeleteBasketAsync(int id);
         Task UpdateBasketAsync(Basket basket);
+        Task<Basket> GetByIdAsync(int basketId);
     }
 }

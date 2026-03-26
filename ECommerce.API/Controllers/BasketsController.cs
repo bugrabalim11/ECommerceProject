@@ -8,15 +8,15 @@ using Microsoft.AspNetCore.Mvc;
 namespace ECommerce.API.Controllers
 {
     // 🔒 KİLİTLİ: Dükkana (Sisteme) giriş yapmayan hiç kimse sepet işlemlerine erişemez!
-    //[Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class BasketController : ControllerBase
+    public class BasketsController : ControllerBase
     {
-        private readonly IBasketService _basketService;
+        private readonly IBasketsService _basketService;
         private readonly IMapper _mapper;
 
-        public BasketController(IBasketService basketService, IMapper mapper)
+        public BasketsController(IBasketsService basketService, IMapper mapper)
         {
             _basketService = basketService;
             _mapper = mapper;
@@ -57,12 +57,18 @@ namespace ECommerce.API.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateBasket(UpdateBasketDto dto)
         {
-            // Çantayı saf veriye (Entity) çevir
-            var updatedBasket= _mapper.Map<Basket>(dto);
+            // 1. Veritabanındaki mevcut kaydı bul (Eski bilgileri korumak için)
+            var existingBasket = await _basketService.GetByIdAsync(dto.BasketId);
 
-            // Aşçıya "Bunu güncelle" emrini ver
-            await _basketService.UpdateBasketAsync(updatedBasket);
-            return Ok("Ürün başarıyla güncellendi!");
+            if (existingBasket == null) return NotFound("Ürün bulunamadı!");
+
+            // 2. Sadece değişen bilgiyi (Adedi) güncelle, diğerleri (Price, ProductId vb.) aynı kalsın
+            existingBasket.StockQuantity = dto.StockQuantity;
+
+            // 3. Aşçıya "Sadece bu kaydı güncelle" de
+            await _basketService.UpdateBasketAsync(existingBasket);
+
+            return Ok("Adet başarıyla güncellendi!");
         }
     }
 }

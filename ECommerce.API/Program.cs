@@ -63,7 +63,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
-builder.Services.AddScoped<IBasketService, BasketService>();
+builder.Services.AddScoped<IBasketsService, BasketService>();
 
 // --- 4. SWAGGER (VİTRİN) AYARLARI ---
 builder.Services.AddSwaggerGen(x =>

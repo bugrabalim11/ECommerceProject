@@ -1,9 +1,10 @@
 ﻿using ECommerce.API.Entities;
 using ECommerce.API.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace ECommerce.API.Services
 {
-    public class BasketService : IBasketService
+    public class BasketService : IBasketsService
     {
         private readonly IBasketRepository _basketRepository;
 
@@ -40,6 +41,16 @@ namespace ECommerce.API.Services
                 // Senin IGenericRepository'deki Delete metodun (Entity alıyor)
                 _basketRepository.Delete(basket);
             }
+        }
+
+        public async Task<Basket> GetByIdAsync(int basketId)
+        {
+            var basket = await _basketRepository.GetByIdAsync(basketId);
+
+            // Eğer sepet bulunamazsa hata fırlat (Böylece null dönme ihtimali kalmaz)
+            if (basket == null) throw new Exception("Sepet kaydı bulunamadı!");
+
+            return basket;
         }
     }
 }

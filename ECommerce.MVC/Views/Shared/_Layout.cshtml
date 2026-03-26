@@ -54,6 +54,10 @@
                     <div class="d-flex align-items-center gap-3">
                         @if (User.Identity?.IsAuthenticated ?? false)
                         {
+                            <a class="btn btn-warning rounded-pill px-4 fw-bold text-dark shadow-sm" asp-controller="Baskets" asp-action="Index">
+                                <i class="fa-solid fa-cart-shopping me-2"></i>Sepetim
+                            </a>
+
                             <div class="dropdown">
                                 <button class="btn btn-outline-light dropdown-toggle rounded-pill px-4" type="button" data-bs-toggle="dropdown">
                                     <i class="fa-solid fa-user-check me-2"></i>@User.Identity.Name
