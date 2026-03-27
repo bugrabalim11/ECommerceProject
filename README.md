@@ -4,19 +4,19 @@ Bu proje, modern web geliştirme standartlarına uygun olarak tasarlanmış, **N
 
 ## 📸 Ekran Görüntüleri
 
-![Ana Sayfa](<img width="1919" height="1079" alt="Ekran görüntüsü 2026-03-27 194920" src="https://github.com/user-attachments/assets/b5ad0d8e-040e-41bf-9c79-0cf3c0412ebc" />)
+![Ana Sayfa](https://github.com/user-attachments/assets/b5ad0d8e-040e-41bf-9c79-0cf3c0412ebc)
 
-![Ürünler Sayfası](<img width="1919" height="1079" alt="Ekran görüntüsü 2026-03-27 194937" src="https://github.com/user-attachments/assets/63c44fbe-9db0-4c4c-8912-174bd47fd62a" />)
+![Ürünler Sayfası](https://github.com/user-attachments/assets/63c44fbe-9db0-4c4c-8912-174bd47fd62a)
 
-![Kategoriler Sayfası](<img width="1919" height="1079" alt="Ekran görüntüsü 2026-03-27 194946" src="https://github.com/user-attachments/assets/cbdcedb0-dd79-4cd3-82e0-75df250891c5" />)
+![Kategoriler Sayfası](https://github.com/user-attachments/assets/cbdcedb0-dd79-4cd3-82e0-75df250891c5)
 
-![Siparişler Sayfası](<img width="1919" height="1079" alt="Ekran görüntüsü 2026-03-27 194958" src="https://github.com/user-attachments/assets/aaea336e-c38c-4570-aeff-4df794d2d4f9" />)
+![Siparişler Sayfası](https://github.com/user-attachments/assets/aaea336e-c38c-4570-aeff-4df794d2d4f9)
 
-![Kullanıcılar Sayfası](<img width="1919" height="1079" alt="Ekran görüntüsü 2026-03-27 195012" src="https://github.com/user-attachments/assets/c0876fc0-7aab-4b84-a807-5dc66fcc66a6" />)
+![Kullanıcılar Sayfası](https://github.com/user-attachments/assets/c0876fc0-7aab-4b84-a807-5dc66fcc66a6)
 
-![Sepet Sayfası](<img width="1919" height="1079" alt="Ekran görüntüsü 2026-03-27 195021" src="https://github.com/user-attachments/assets/a3931769-bdb3-43d4-9b0a-7554ff602108" />)
+![Sepet Sayfası](https://github.com/user-attachments/assets/a3931769-bdb3-43d4-9b0a-7554ff602108)
 
-![Profil Sayfası](<img width="1919" height="1079" alt="Ekran görüntüsü 2026-03-27 195033" src="https://github.com/user-attachments/assets/e19c88b6-4ca4-4ac3-bfe6-ac66097568b5" />)
+![Profil Sayfası](https://github.com/user-attachments/assets/e19c88b6-4ca4-4ac3-bfe6-ac66097568b5)
 
 ## 🚀 Öne Çıkan Özellikler
 
