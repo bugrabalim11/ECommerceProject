@@ -9,7 +9,7 @@ namespace ECommerce.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public class UsersController : ControllerBase
     {
         // Artık veritabanıyla değil, Aşçımızla (Service) konuşuyoruz!
@@ -22,6 +22,7 @@ namespace ECommerce.API.Controllers
             _mapper = mapper;  // 2. İçeri aldık
         }
 
+        [Authorize(Roles = "Admin")] // <--- Bunu eklemezsek, sisteme giren normal bir müşteri de tüm kullanıcıların listesini çekebilir!
         [HttpGet]
         public async Task<IActionResult> GetUserList()
         {
@@ -64,6 +65,7 @@ namespace ECommerce.API.Controllers
             return Ok("Yeni Kullanıcı Başarıyla Eklendi!");
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
