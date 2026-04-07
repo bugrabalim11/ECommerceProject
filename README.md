@@ -10,7 +10,7 @@ Bu proje, modern web geliştirme standartlarına uygun olarak tasarlanmış, **N
 
 ![Kategoriler Sayfası](https://github.com/user-attachments/assets/cbdcedb0-dd79-4cd3-82e0-75df250891c5)
 
-![Siparişler Sayfası](https://github.com/user-attachments/assets/aaea336e-c38c-4570-aeff-4df794d2d4f9)
+![Siparişler Sayfası](https://github.com/user-attachments/assets/ce9144eb-dbd1-44cc-9880-71a27b290b72)
 
 ![Kullanıcılar Sayfası](https://github.com/user-attachments/assets/c0876fc0-7aab-4b84-a807-5dc66fcc66a6)
 
