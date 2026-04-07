@@ -31,7 +31,7 @@ namespace ECommerce.MVC.Controllers
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             // 3. API'DEN VERİYİ İSTE: Şeften tüm siparişlerin listesini istiyoruz
-            var responseMessage = await client.GetAsync("https://localhost:7107/api/Orders");
+            var responseMessage = await client.GetAsync("https://localhost:7107/api/Orders/GetOrderWithDetails");
 
             // 🛡️ YENİ GÜVENLİK KONTROLÜ: Şef (API) "Bu kart geçersiz veya süresi dolmuş" derse (401):
             if (responseMessage.StatusCode == System.Net.HttpStatusCode.Unauthorized)
